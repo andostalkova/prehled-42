@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Přehled 42</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Přehled 42">
+<meta name="theme-color" content="#2f5fd0">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏠</text></svg>">
+<style>
+:root{
+  --bg:#f6f7f9; --card:#ffffff; --ink:#16181d; --muted:#6b7280; --line:#e4e7ec;
+  --accent:#2f5fd0; --accent-soft:#eaf0fd;
+  --red:#c0392b; --red-soft:#fdecea;
+  --amber:#a76b00; --amber-soft:#fdf3e0;
+  --green:#1f7a4d; --green-soft:#e8f6ee;
+  --grey-soft:#f0f1f4;
+  --panel:#f7f8fa;
+  --radius:12px;
+  /* barvy kategorií – schválně jiné než červená/oranžová/zelená naléhavosti;
+     ztmavené, aby drobné verzálky měly dost kontrastu */
+  --c-smlouva:#4338ca;   /* indigová  */
+  --c-zalohy:#0f766e;    /* petrolejová */
+  --c-vyuct:#7e22ce;     /* fialová */
+  --c-pojisteni:#9d174d; /* malinová */
+  --c-hypo:#075985;      /* modrá */
+  --c-energie:#475569;   /* břidlicová */
+  /* barvy bytů */
+  --b-trigema:#4338ca; --b-kacirkova:#0f766e;
+  --b-kobranova:#7e22ce; --b-luziny:#b45309; --b-botanika:#0e7490; --b-auto:#be123c;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#14161a; --card:#1c1f25; --ink:#e8eaee; --muted:#9aa1ad; --line:#2c313a;
+    --accent:#7ba3f5; --accent-soft:#1e2739;
+    --red:#f08a7e; --red-soft:#33211f;
+    --amber:#e0b263; --amber-soft:#302818;
+    --green:#7fd0a3; --green-soft:#1a2b22;
+    --grey-soft:#24272e; --panel:#23272f;
+    --c-smlouva:#a5a0f8; --c-zalohy:#5eccc0;
+    --c-vyuct:#c79bf0; --c-pojisteni:#f090b6; --c-hypo:#7cc0ea; --c-energie:#a9b8cc;
+    --b-trigema:#a5a0f8; --b-kacirkova:#5eccc0;
+    --b-kobranova:#c79bf0; --b-luziny:#e0a45c; --b-botanika:#67d4e8; --b-auto:#f4a3b5;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;}
+.wrap{max-width:1400px;margin:0 auto;padding:28px 20px 80px}
+
+header{margin-bottom:22px;display:flex;align-items:baseline;flex-wrap:wrap;column-gap:16px;row-gap:4px}
+h1{font-size:26px;margin:0;letter-spacing:-.02em}
+.sub{color:var(--muted);font-size:13.5px}
+
+/* ---- filtry ---- */
+.filters{display:flex;flex-wrap:wrap;gap:18px;margin:22px 0 8px;
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
+.fgroup{display:flex;flex-direction:column;gap:7px}
+.flabel{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:transparent;color:var(--ink);
+  padding:5px 12px;border-radius:999px;font-size:13px;cursor:pointer;font-family:inherit;
+  transition:background .12s,border-color .12s}
+.chip:hover{background:var(--grey-soft)}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.count{color:var(--muted);font-size:12.5px;align-self:flex-end;margin-left:auto;padding-bottom:4px}
+.filters[hidden]{display:none}
+
+/* ---- sekce ---- */
+h2{font-size:14px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);
+  margin:34px 0 12px;font-weight:600}
+.h2row{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin:34px 0 12px}
+.h2row h2{margin:0}
+.collapsebtn{background:none;border:1px solid var(--line);color:var(--muted);
+  font:inherit;font-size:12px;padding:3px 11px;border-radius:999px;cursor:pointer;
+  letter-spacing:.02em}
+.collapsebtn:hover{background:var(--grey-soft);color:var(--ink)}
+
+/* ---- termíny ---- */
+/* Co je potřeba řešit (vlevo) a Platby (vpravo) vedle sebe; na úzkém displeji pod sebou */
+.toprow{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(320px,1fr);column-gap:22px;align-items:start}
+@media (max-width:900px){ .toprow{grid-template-columns:minmax(0,1fr)} }
+.tl{display:flex;flex-direction:column;gap:6px}
+.ev{display:grid;grid-template-columns:20px 92px 1fr auto;gap:10px;align-items:center;
+  background:var(--card);border:1px solid var(--line);border-left:4px solid var(--line);
+  border-radius:10px;padding:7px 12px;transition:opacity .15s}
+.ev input[type=checkbox]{width:17px;height:17px;accent-color:var(--green);cursor:pointer;margin:0}
+.ev.done{opacity:.5;border-left-color:var(--green)}
+.ev.done .ev-title{text-decoration:line-through}
+.donebar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  margin:0 0 12px;font-size:13px;color:var(--muted)}
+.donebar progress{width:150px;height:7px;accent-color:var(--green)}
+.linkbtn{background:none;border:0;color:var(--accent);font:inherit;font-size:13px;
+  cursor:pointer;padding:0;text-decoration:underline}
+.linkbtn:hover{opacity:.75}
+.note{background:var(--amber-soft);color:var(--amber);border-radius:8px;
+  padding:9px 12px;font-size:12.5px;margin-bottom:12px}
+.ev.red{border-left-color:var(--red)} .ev.amber{border-left-color:var(--amber)}
+.ev.green{border-left-color:var(--green)} .ev.blue{border-left-color:var(--accent)}
+.ev-when{font-variant-numeric:tabular-nums}
+.ev-date{font-weight:600;font-size:13px}
+.ev-in{font-size:11.5px;color:var(--muted)}
+.ev-title{font-weight:600;font-size:13.5px;margin-bottom:1px}
+.ev-desc{font-size:12px;color:var(--muted);line-height:1.4}
+.ev-flat{font-size:12px;padding:3px 9px;border-radius:999px;background:var(--grey-soft);
+  color:var(--muted);white-space:nowrap}
+
+/* ---- platby ---- */
+.platby{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:6px 14px 10px}
+.pt{width:100%;border-collapse:collapse;font-size:13px}
+.pt th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);
+  font-weight:600;padding:6px 4px;border-bottom:1px solid var(--line)}
+.pt td{padding:6px 4px;border-bottom:1px solid var(--line);vertical-align:top}
+.pt tr:last-child td{border-bottom:0}
+.pt td.num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.pt th.num{text-align:right}
+.pt .kde{display:block;font-size:11.5px;color:var(--muted)}
+.zp{display:inline-block;font-size:11px;font-weight:600;padding:1px 7px;border-radius:999px;white-space:nowrap}
+.zp-ink{background:var(--green-soft);color:var(--green)}
+.zp-prev{background:var(--amber-soft);color:var(--amber)}
+.zp-nev{background:var(--grey-soft);color:var(--muted)}
+.pt-sum{margin-top:8px;font-size:12.5px;color:var(--muted)}
+@media (max-width:660px){ .platby{overflow-x:auto} .pt{min-width:430px} }
+.pt-sum b{color:var(--ink)}
+.badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;
+  margin-left:8px;vertical-align:1px;letter-spacing:.02em}
+.b-red{background:var(--red-soft);color:var(--red)}
+.b-amber{background:var(--amber-soft);color:var(--amber)}
+.b-green{background:var(--green-soft);color:var(--green)}
+
+/* ---- karty bytů ---- */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+  gap:0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:0 0 12px;margin-bottom:16px;display:flex;flex-direction:column;overflow:hidden}
+/* Karty sdílejí řádky mřížky, takže stejný blok (nájem, zálohy, pojištění…)
+   začíná i končí u všech bytů ve stejné výšce. Prázdné pozice zůstanou prázdné. */
+@supports (grid-template-rows: subgrid){
+  .card.slots{display:grid;grid-row:span 11;grid-template-rows:subgrid}
+}
+.card.common{grid-column:1/-1}
+/* Dům (Botanika): dvě karty vedle sebe, každá přesně ve sloupci mřížky jako ostatní karty */
+.house-row{grid-column:span 2;grid-row:span 11;display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));column-gap:16px;align-items:stretch}
+@supports (grid-template-columns: subgrid){
+  .house-row{grid-template-columns:subgrid}
+}
+@media (max-width:660px){
+  .house-row{grid-column:1/-1;grid-row:auto;grid-template-columns:1fr}
+}
+/* Tři karty domu (Pojištění, Energie, Voda) potřebují tři sloupce. Kde se vejdou jen dva,
+   řádek domu přes celou šířku a třetí karta se zalomí pod první. */
+.house-row.tri{grid-column:span 3}
+@media (max-width:1000px){
+  .house-row.tri{grid-column:1/-1;grid-row:auto;row-gap:0;
+    grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+  @supports (grid-template-columns: subgrid){ .house-row.tri{grid-template-columns:subgrid} }
+}
+@media (max-width:660px){
+  .house-row.tri{grid-template-columns:1fr}
+}
+/* tabulka vývoje cen */
+.ph-scroll{overflow-x:auto}
+.ph{width:100%;border-collapse:collapse;font-size:13px}
+.ph th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);
+  font-weight:600;padding:4px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+.ph td{padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+.ph td.ph-cena{min-width:150px;white-space:nowrap}
+.ph-barwrap{display:inline-block;width:70px;height:7px;background:var(--grey-soft);border-radius:99px;
+  overflow:hidden;margin-right:8px;vertical-align:middle}
+.ph-barwrap i{display:block;height:100%;background:var(--c-energie);border-radius:99px}
+.ph tr.ph-now td{font-weight:600;background:var(--accent-soft)}
+.ph td.ph-src{color:var(--muted);font-size:12px}
+.ph-note{margin-top:10px;font-size:12.5px;color:var(--muted)}
+.cardhead{padding:13px 16px 12px}
+.card.c-trigema  {border-top:3px solid var(--b-trigema)}
+.card.c-kacirkova{border-top:3px solid var(--b-kacirkova)}
+.card.c-kobranova{border-top:3px solid var(--b-kobranova)}
+.card.c-luziny   {border-top:3px solid var(--b-luziny)}
+.card.c-botanika {border-top:3px solid var(--b-botanika)}
+.card.c-auto     {border-top:3px solid var(--b-auto)}
+.card h3{margin:0 0 2px;font-size:17px;letter-spacing:-.01em}
+.addr{font-size:12.5px;color:var(--muted)}
+
+/* každý blok je samostatný panel */
+.block{background:var(--panel);border-radius:10px;padding:11px 13px;margin:0 12px 8px}
+.btitle{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);
+  font-weight:700;margin-bottom:8px}
+.blk-smlouva   .btitle{color:var(--c-smlouva)}
+.blk-zalohy    .btitle{color:var(--c-zalohy)}
+.blk-vyuct     .btitle{color:var(--c-vyuct)}
+.blk-pojisteni .btitle{color:var(--c-pojisteni)}
+.blk-hypo      .btitle{color:var(--c-hypo)}
+.blk-energie   .btitle{color:var(--c-energie)}
+/* podnadpisy Elektřina a Plyn: stejná červenavá (malinová) jako nadpis Pojištění */
+.blk-energie   .btitle-komodita{color:var(--c-pojisteni);margin-top:2px}
+.blk-voda      .btitle{color:var(--c-energie)}
+
+/* filtry kategorií nesou stejnou barvu jako nadpisy bloků */
+.chip.k-smlouva  {color:var(--c-smlouva)}
+.chip.k-zalohy   {color:var(--c-zalohy)}
+.chip.k-vyuct    {color:var(--c-vyuct)}
+.chip.k-pojisteni{color:var(--c-pojisteni)}
+.chip.k-hypo     {color:var(--c-hypo)}
+.chip.k-energie  {color:var(--c-energie)}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+
+.rows{display:flex;flex-direction:column;gap:5px}
+.row{display:flex;justify-content:space-between;gap:10px;font-size:13.5px}
+.row span:first-child{color:var(--muted);flex:0 0 auto}
+.row span:last-child{text-align:right;font-variant-numeric:tabular-nums;
+  min-width:0;overflow-wrap:anywhere}
+.big{font-size:15px;font-weight:600}
+
+.bar{height:6px;background:var(--grey-soft);border-radius:99px;overflow:hidden;margin:9px 0 6px}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:99px}
+.bar.warn i{background:var(--amber)} .bar.crit i{background:var(--red)}
+
+.links{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.links a{font-size:12.5px;text-decoration:none;color:var(--accent);background:var(--accent-soft);
+  border:1px solid transparent;padding:5px 10px;border-radius:7px;
+  max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.links a:hover{border-color:var(--accent)}
+
+.warnbox{background:var(--amber-soft);color:var(--amber);border-radius:10px;
+  padding:10px 13px;font-size:12.5px;margin:0 12px}
+.block .warnbox{margin:8px 0 0}
+.warnbox b{display:block;margin-bottom:2px}
+.warnbox ul{margin:4px 0 0;padding-left:16px}
+
+.empty{color:var(--muted);font-size:13.5px;background:var(--card);border:1px dashed var(--line);
+  border-radius:var(--radius);padding:20px;text-align:center}
+
+footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);
+  color:var(--muted);font-size:12.5px}
+footer code{background:var(--grey-soft);padding:1px 5px;border-radius:4px;font-size:11.5px}
+
+@media (max-width:640px){
+  .ev{grid-template-columns:26px 1fr;gap:8px 12px}
+  .ev-when,.ev-flat{grid-column:2}
+  .ev-flat{justify-self:start}
+  .filters{flex-direction:column;gap:14px}
+  .count{margin-left:0;align-self:flex-start}
+}
+
+/* --- přihlášení a web --- */
+.nolink{font-size:12.5px;color:var(--muted);background:var(--grey-soft);border:1px solid transparent;
+  padding:5px 10px;border-radius:7px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:default}
+.login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.login form{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:28px 24px;width:100%;max-width:360px;
+  box-shadow:0 4px 18px rgba(0,0,0,.06)}
+.login h1{margin-bottom:4px}
+.login .sub{margin-bottom:20px}
+.login label{display:block;font-size:13px;color:var(--muted);margin:14px 0 5px}
+.login input{width:100%;font:inherit;font-size:16px;padding:11px 12px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--ink)}
+.login input:focus{outline:2px solid var(--accent);outline-offset:1px}
+.login button{margin-top:20px;width:100%;font:inherit;font-weight:600;padding:12px;border:0;border-radius:9px;background:var(--accent);color:#fff;cursor:pointer}
+.login button:disabled{opacity:.6;cursor:default}
+.login .err{color:var(--red);font-size:13.5px;margin-top:14px;min-height:1.2em}
+.logout{margin-left:auto}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="login" id="login" hidden>
+  <form id="form" autocomplete="on">
+    <h1>Přehled 42</h1>
+    <div class="sub">Přihlášení</div>
+    <label for="email">E-mail</label>
+    <input id="email" name="email" type="email" autocomplete="username" inputmode="email" autocapitalize="none" required>
+    <label for="heslo">Heslo</label>
+    <input id="heslo" name="password" type="password" autocomplete="current-password" required>
+    <button id="btn" type="submit">Přihlásit</button>
+    <div class="err" id="err" role="alert"></div>
+  </form>
+</div>
+<div id="app" hidden>
+<div class="wrap">
+
+<header>
+  <h1>Přehled 42</h1>
+  <div class="sub">Byty, Botanika a auto: nájemní smlouvy, vyúčtování, zálohy, pojištění a hypotéky · <span id="today"></span></div>
+  <button class="linkbtn logout" id="logout">Odhlásit</button>
+</header>
+
+<!-- Filtry jsou skryté na přání Andrey; vrátit = smazat atribut hidden. -->
+<div class="filters" hidden>
+  <div class="fgroup">
+    <div class="flabel">Nemovitost</div>
+    <div class="chips" id="f-flat"></div>
+  </div>
+  <div class="fgroup">
+    <div class="flabel">Kategorie</div>
+    <div class="chips" id="f-cat"></div>
+  </div>
+  <div class="count" id="count"></div>
+</div>
+
+<div class="toprow">
+<section class="col-ukoly">
+<div class="h2row">
+  <h2>Co je potřeba řešit</h2>
+  <button class="collapsebtn" id="collapse">Skrýt úkoly</button>
+</div>
+<div id="ukoly">
+  <div id="storagenote"></div>
+  <div class="donebar">
+    <progress id="prog" value="0" max="1"></progress>
+    <span id="progtext"></span>
+    <button class="linkbtn" id="toggledone"></button>
+    <button class="linkbtn" id="resetdone">Odškrtnout vše</button>
+  </div>
+  <div class="tl" id="timeline"></div>
+</div>
+</section>
+<section class="col-platby">
+  <div class="h2row"><h2>Platby · příští 3 měsíce</h2></div>
+  <div class="platby" id="platby"></div>
+</section>
+</div>
+
+<h2>Byty</h2>
+<div class="grid" id="cards"></div>
+
+<h2>Auto</h2>
+<div class="grid" id="auto"></div>
+
+<footer>
+  Data pocházejí z nájemních smluv, evidenčních listů, vyúčtování a úvěrových smluv. Dokumenty jsou uložené jen v počítači – tady se zobrazí jejich název.
+  <br>Obsahuje čísla úvěrů a účtů – nesdílej přihlášení.
+  <br>Poslední aktualizace dat: 5. 11. 2026.
+</footer>
+
+</div>
+
+
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://wjgdbcbthbfcwokohwxm.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_AFQX4GNMBYU_tRvJO1FD8A_dFMJanbX';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const $ = id => document.getElementById(id);
+let appLoaded = false;
+
+async function nactiData(){
+  const [o, n] = await Promise.all([
+    sb.from('p42_objekty').select('id,typ,poradi,data').order('poradi'),
+    sb.from('p42_nastaveni').select('klic,hodnota')
+  ]);
+  if (o.error) throw o.error;
+  if (n.error) throw n.error;
+  const P = { BYTY: [], AUTO: null, OBECNE: [], UPOZORNENI_MESICU: 3 };
+  o.data.forEach(r => { if (r.typ === 'auto') P.AUTO = r.data; else P.BYTY.push(r.data); });
+  n.data.forEach(r => {
+    if (r.klic === 'obecne') P.OBECNE = r.hodnota;
+    if (r.klic === 'upozorneni_mesicu') P.UPOZORNENI_MESICU = Number(r.hodnota);
+  });
+  if (!P.AUTO || !P.BYTY.length) throw new Error('V databázi chybí data.');
+  return P;
+}
+
+async function spustApp(){
+  try {
+    window.P42 = await nactiData();
+  } catch (e) {
+    await sb.auth.signOut();
+    ukazPrihlaseni('Data se nepodařilo načíst: ' + (e.message || e));
+    return;
+  }
+  $('login').hidden = true;
+  $('app').hidden = false;
+  if (!appLoaded) {
+    appLoaded = true;
+    const s = document.createElement('script');
+    s.src = 'app.js?v=1';
+    s.onerror = () => { appLoaded = false; ukazPrihlaseni('Nepodařilo se načíst aplikaci.'); };
+    document.body.appendChild(s);
+  }
+}
+
+function ukazPrihlaseni(msg){
+  $('app').hidden = true;
+  $('login').hidden = false;
+  $('err').textContent = msg || '';
+  $('btn').disabled = false;
+  $('btn').textContent = 'Přihlásit';
+}
+
+$('form').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  $('btn').disabled = true; $('btn').textContent = 'Přihlašuji…'; $('err').textContent = '';
+  const { error } = await sb.auth.signInWithPassword({ email: $('email').value.trim(), password: $('heslo').value });
+  if (error) { ukazPrihlaseni('Přihlášení se nezdařilo. Zkontroluj e-mail a heslo.'); return; }
+  $('heslo').value = '';
+  spustApp();
+});
+
+$('logout').addEventListener('click', async () => { await sb.auth.signOut(); location.reload(); });
+
+sb.auth.getSession().then(({ data }) => { if (data.session) spustApp(); else ukazPrihlaseni(''); });
+</script>
+</body>
+</html>
