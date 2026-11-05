@@ -306,10 +306,10 @@ async function synchronizujUkoly(){
   try { puvodni = JSON.parse(localStorage.getItem("byty-hotovo-v1") || "{}"); } catch(e){}
 
   const potreba = events.filter(vOkne);
-  const nove = potreba.filter(e => !maji[refUkolu(e)]).map(e => ({
+  const nove = potreba.filter(e => !maji[refUkolu(e)]).map((e, i) => ({
     id: novyIdUkolu(), title: nazevUkolu(e), cat: UKOL_KATEGORIE, date: e.date, person: UKOL_OSOBA,
     store: "", important: dayDiff(e.date) <= 30, secret: false, owner: "", done: !!puvodni[e.id],
-    created: Date.now(), ref: refUkolu(e)
+    created: Date.now() + i, ref: refUkolu(e)   // + i: Úkolárna řadí stejné datum podle vzniku, tedy v pořadí Přehledu
   }));
   if(nove.length){
     const r = await sb.from("tasks").upsert(nove, { onConflict:"ref", ignoreDuplicates:true });
