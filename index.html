@@ -264,7 +264,7 @@ footer code{background:var(--grey-soft);padding:1px 5px;border-radius:4px;font-s
 </head>
 <body>
 <div class="login" id="login" hidden>
-  <form id="form" autocomplete="on">
+  <form id="form" autocomplete="on" action="about:blank" method="post" target="pwsave">
     <h1>Přehled 42</h1>
     <div class="sub">Přihlášení</div>
     <label for="email">E-mail</label>
@@ -274,6 +274,7 @@ footer code{background:var(--grey-soft);padding:1px 5px;border-radius:4px;font-s
     <button id="btn" type="submit">Přihlásit</button>
     <div class="err" id="err" role="alert"></div>
   </form>
+  <iframe name="pwsave" title="" hidden></iframe>
 </div>
 <div id="app" hidden>
 <div class="wrap">
@@ -388,12 +389,17 @@ function ukazPrihlaseni(msg){
   $('btn').textContent = 'Přihlásit';
 }
 
-$('form').addEventListener('submit', async ev => {
-  ev.preventDefault();
+/* Formulář se odesílá do skrytého rámečku (about:blank), aby prohlížeč a Klíčenka poznaly
+   odeslání přihlášení a nabídly uložení hesla. Samotné přihlášení řeší JavaScript. */
+$('form').addEventListener('submit', async () => {
   $('btn').disabled = true; $('btn').textContent = 'Přihlašuji…'; $('err').textContent = '';
-  const { error } = await sb.auth.signInWithPassword({ email: $('email').value.trim(), password: $('heslo').value });
+  const email = $('email').value.trim(), heslo = $('heslo').value;
+  const { error } = await sb.auth.signInWithPassword({ email, password: heslo });
   if (error) { ukazPrihlaseni('Přihlášení se nezdařilo. Zkontroluj e-mail a heslo.'); return; }
-  $('heslo').value = '';
+  if (window.PasswordCredential && navigator.credentials) {
+    try { await navigator.credentials.store(new PasswordCredential({ id: email, password: heslo, name: email })); } catch (e) {}
+  }
+  setTimeout(() => { $('heslo').value = ''; }, 1500);
   spustApp();
 });
 
