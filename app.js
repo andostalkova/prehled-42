@@ -122,7 +122,7 @@ function dalsiDenVMesici(den){
 
 const events = [];
 BYTY.forEach(b=>{
-  (b.udalosti||[]).forEach(u=>events.push({flat:b.id, cat:u.cat, date:u.date, title:u.title, desc:u.desc, inkaso:u.inkaso}));
+  (b.udalosti||[]).forEach(u=>events.push({flat:b.id, cat:u.cat, date:u.date, title:u.title, ukol:u.ukol, desc:u.desc, inkaso:u.inkaso}));
   (b.pojisteni||[]).forEach(p=>{
     events.push({flat:b.id, cat:"pojisteni", date:dalsiVyroci(p.vyrociDen,p.vyrociMesic),
       title:DRUH[p.druh]+" – výročí ("+p.pojistovna+")",
@@ -227,26 +227,133 @@ const KONEC_OKNA = (()=>{ const d=new Date(TODAY); d.setMonth(d.getMonth()+OKNO_
   return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); })();
 const vOkne = e => !e.inkaso && dayDiff(e.date) >= 0 && e.date <= KONEC_OKNA;
 
-/* --- odškrtnuté úkoly ---------------------------------------------------
-   Ukládají se do paměti prohlížeče (localStorage). Zůstanou i po zavření
-   souboru, ale platí jen pro tenhle prohlížeč na tomhle počítači.
+/* --- úkoly v Myší úkolárně (tabulka tasks) ----------------------------------
+   Termíny ze seznamu „Co je potřeba řešit“ se zakládají jako úkoly: kategorie „Přehled 42“,
+   osoba An, název bez jmen nájemníků, částek a čísel (tabulka tasks je otevřená pro Úkolárnu).
+   Odškrtnutí je sloupec done u úkolu, takže platí v Přehledu 42 i v Úkolárně a pro oba účty.
+   Osoba a odškrtnutí se při synchronizaci nikdy nepřepisují.
    ----------------------------------------------------------------------- */
-const KEY = "byty-hotovo-v1";
-let storageOK = true;
-let done = {};
-try {
-  done = JSON.parse(localStorage.getItem(KEY) || "{}");
-  localStorage.setItem(KEY, JSON.stringify(done));
-} catch(e) { storageOK = false; done = {}; }
+const UKOL_KATEGORIE = "Přehled 42";
+const UKOL_OSOBA = "An";
+const refUkolu = e => "p42|" + e.id;
 
-function saveDone(){
-  if(!storageOK) return;
-  try { localStorage.setItem(KEY, JSON.stringify(done)); } catch(e){ storageOK=false; renderNote(); }
+/* Neutrální název podle začátku původního názvu události. Ručně zadané události mají pole ukol. */
+const UKOL_NAZVY = [
+  ["Pojištění bytu", "zaplatit pojistné za byt"],
+  ["Pojištění nemovitosti", "zaplatit pojistné za nemovitost"],
+  ["Pojištění domu a domácnosti", "zaplatit pojistné za dům a domácnost"],
+  ["Pojištění auta", "zaplatit pojistné za auto (nová smlouva)"],
+  ["Řešit další dodávku energií", "řešit další dodávku energií"],
+  ["Konec doby určité", "konec pevné ceny energií"],
+  ["Očekávané roční vyúčtování vody", "roční vyúčtování vody"],
+  ["Výměna podružného vodoměru", "výměna vodoměru"],
+  ["Začít shánět nabídky", "hypotéka – začít shánět nabídky"],
+  ["Konec fixace", "konec fixace hypotéky"],
+  ["Konec lhůty pro čerpání", "konec lhůty čerpání hypotéky"],
+  ["Plánovaný začátek pronájmu", "plánovaný začátek pronájmu"],
+  ["Řešit prodloužení nájmu", "řešit prodloužení nájmu"],
+  ["Konec nájemní smlouvy", "konec nájemní smlouvy"],
+  ["Očekávané vyúčtování", "očekávané vyúčtování služeb"],
+  ["Nedoplatek z vyúčtování", "zaplatit nedoplatek z vyúčtování"],
+  ["Nová výše záloh", "nová výše záloh správci"],
+  ["Objednat STK", "objednat STK"],
+  ["Konec platnosti STK", "konec platnosti STK"],
+  ["Fotky auta", "fotky auta pro Kooperativu"],
+  ["Konec dálniční známky", "konec dálniční známky"]
+];
+function nazevUkolu(e){
+  const b = BYTY.find(x=>x.id===e.flat) || AUTO;
+  const t = e.ukol || (UKOL_NAZVY.find(([p])=>e.title.startsWith(p))||[])[1] || (CATS[e.cat]||"termín").toLowerCase();
+  return b.kratky + " – " + t;
 }
-function renderNote(){
-  document.getElementById("storagenote").innerHTML = storageOK ? "" :
-    `<div class="note">Prohlížeč nedovolil uložit odškrtnutí natrvalo –
-     zůstanou jen do zavření stránky. Pomůže otevřít soubor v Chrome nebo Edge.</div>`;
+
+let done = {};   // id události -> true, plní se z tabulky tasks
+const isoDen = d => d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const novyIdUkolu = () => "p42" + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+
+function renderNote(msg){
+  document.getElementById("storagenote").innerHTML = msg
+    ? `<div class="note">${msg}</div>` : "";
+}
+
+async function nactiUkoly(){
+  const r = await sb.from("tasks").select("id,ref,title,date,person,done").like("ref","p42|%");
+  if(r.error) throw r.error;
+  return r.data;
+}
+function dosadOdskrtnuti(rows){
+  const m = {};
+  rows.forEach(r => { if(r.done) m[r.ref] = true; });
+  done = {};
+  events.forEach(e => { if(m[refUkolu(e)]) done[e.id] = true; });
+}
+
+async function synchronizujUkoly(){
+  const rows = await nactiUkoly();
+  const maji = {};
+  rows.forEach(r => maji[r.ref] = r);
+
+  /* Odškrtnutí z dřívější verze (jen v tomto prohlížeči) se jednorázově převede do nových úkolů. */
+  let puvodni = {};
+  try { puvodni = JSON.parse(localStorage.getItem("byty-hotovo-v1") || "{}"); } catch(e){}
+
+  const potreba = events.filter(vOkne);
+  const nove = potreba.filter(e => !maji[refUkolu(e)]).map(e => ({
+    id: novyIdUkolu(), title: nazevUkolu(e), cat: UKOL_KATEGORIE, date: e.date, person: UKOL_OSOBA,
+    store: "", important: dayDiff(e.date) <= 30, secret: false, owner: "", done: !!puvodni[e.id],
+    created: Date.now(), ref: refUkolu(e)
+  }));
+  if(nove.length){
+    const r = await sb.from("tasks").upsert(nove, { onConflict:"ref", ignoreDuplicates:true });
+    if(r.error) throw r.error;
+  }
+
+  /* Opravit název u nehotových úkolů, kdyby se změnil. */
+  for(const e of potreba){
+    const r = maji[refUkolu(e)];
+    if(r && !r.done && r.title !== nazevUkolu(e)){
+      await sb.from("tasks").update({ title: nazevUkolu(e) }).eq("ref", r.ref);
+    }
+  }
+
+  /* Nehotový úkol, který zůstal u Andrey a jehož událost už neexistuje (změnilo se datum),
+     se odstraní. Delegované úkoly a úkoly s proběhlým termínem zůstávají. */
+  const existuji = new Set(events.map(refUkolu));
+  const dnes = isoDen(TODAY);
+  const zrusit = rows.filter(r => !r.done && r.person === UKOL_OSOBA && !existuji.has(r.ref) && r.date >= dnes);
+  for(const r of zrusit) await sb.from("tasks").delete().eq("ref", r.ref);
+
+  dosadOdskrtnuti(await nactiUkoly());
+}
+
+async function nastavOdskrtnuti(id, hotovo){
+  const r = await sb.from("tasks").update({ done: hotovo }).eq("ref", "p42|" + id);
+  if(r.error){ renderNote("Odškrtnutí se nepodařilo uložit: " + r.error.message); return false; }
+  renderNote("");
+  return true;
+}
+
+let obnovCasovac = null;
+async function obnovOdskrtnuti(){
+  try { dosadOdskrtnuti(await nactiUkoly()); renderTimeline(); renderCollapse(); } catch(e){}
+}
+function spustSdileni(){
+  sb.channel("p42-tasks")
+    .on("postgres_changes", { event:"*", schema:"public", table:"tasks" }, () => {
+      clearTimeout(obnovCasovac); obnovCasovac = setTimeout(obnovOdskrtnuti, 300);
+    })
+    .subscribe();
+  document.addEventListener("visibilitychange", () => { if(!document.hidden) obnovOdskrtnuti(); });
+}
+async function inicializujUkoly(){
+  try {
+    await synchronizujUkoly();
+    renderNote("");
+  } catch(e){
+    renderNote("Úkoly se nepodařilo propojit s Úkolárnou: " + (e.message || e) + ". Odškrtnutí se nemusí uložit.");
+  }
+  renderTimeline(); renderCollapse();
+  spustSdileni();
 }
 
 /* --- filtry --- */
@@ -319,10 +426,14 @@ function renderTimeline(){
   }).join("");
 
   box.querySelectorAll("input[type=checkbox]").forEach(cb=>{
-    cb.onchange = () => {
-      if(cb.checked) done[cb.dataset.id] = new Date().toISOString().slice(0,10);
-      else delete done[cb.dataset.id];
-      saveDone(); renderTimeline(); renderCollapse();
+    cb.onchange = async () => {
+      const id = cb.dataset.id, hotovo = cb.checked;
+      if(hotovo) done[id] = true; else delete done[id];
+      renderTimeline(); renderCollapse();
+      if(!(await nastavOdskrtnuti(id, hotovo))){
+        if(hotovo) delete done[id]; else done[id] = true;
+        renderTimeline(); renderCollapse();
+      }
     };
   });
 }
@@ -827,12 +938,14 @@ document.getElementById("collapse").onclick = () => {
 };
 
 document.getElementById("toggledone").onclick = () => { hideDone = !hideDone; renderTimeline(); };
-document.getElementById("resetdone").onclick = () => {
-  if(!confirm("Opravdu odškrtnout všechny hotové úkoly?")) return;
-  done = {}; saveDone(); renderTimeline();
+document.getElementById("resetdone").onclick = async () => {
+  if(!confirm("Opravdu zrušit odškrtnutí všech úkolů? Platí i v Myší úkolárně.")) return;
+  const r = await sb.from("tasks").update({ done:false }).like("ref","p42|%");
+  if(r.error){ renderNote("Odškrtnutí se nepodařilo zrušit: " + r.error.message); return; }
+  done = {}; renderTimeline(); renderCollapse();
 };
-renderNote();
 
 document.getElementById("today").textContent =
   "dnes " + TODAY.toLocaleDateString("cs-CZ",{day:"numeric",month:"long",year:"numeric"});
 render();
+inicializujUkoly();

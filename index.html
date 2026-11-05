@@ -326,7 +326,7 @@ footer code{background:var(--grey-soft);padding:1px 5px;border-radius:4px;font-s
     <progress id="prog" value="0" max="1"></progress>
     <span id="progtext"></span>
     <button class="linkbtn" id="toggledone"></button>
-    <button class="linkbtn" id="resetdone">Odškrtnout vše</button>
+    <button class="linkbtn" id="resetdone">Zrušit všechna odškrtnutí</button>
   </div>
   <div class="tl" id="timeline"></div>
 </div>
@@ -391,7 +391,7 @@ async function spustApp(){
   if (!appLoaded) {
     appLoaded = true;
     const s = document.createElement('script');
-    s.src = 'app.js?v=1';
+    s.src = 'app.js?v=3';
     s.onerror = () => { appLoaded = false; ukazPrihlaseni('Nepodařilo se načíst aplikaci.'); };
     document.body.appendChild(s);
   }
