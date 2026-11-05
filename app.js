@@ -357,7 +357,10 @@ async function inicializujUkoly(){
 }
 
 /* --- filtry --- */
-let fFlat="all", fCat="all", hideDone=false;
+let fFlat="all", fCat="all";
+/* Hotové termíny se ve výchozím stavu skrývají, volba se pamatuje v prohlížeči. */
+let hideDone = true;
+try { hideDone = localStorage.getItem("p42-skryt-hotove") !== "0"; } catch(e){}
 
 function chips(el, items, cur, cb, tecky){
   el.innerHTML="";
@@ -394,7 +397,7 @@ function renderTimeline(){
   document.getElementById("progtext").textContent =
     list.length ? `${hotovo} z ${list.length} hotovo` : "";
   const tg=document.getElementById("toggledone");
-  tg.textContent = hideDone ? "Zobrazit hotové" : "Skrýt hotové";
+  tg.textContent = hideDone ? `Zobrazit hotové (${hotovo})` : "Skrýt hotové";
   tg.style.display = hotovo ? "" : "none";
   document.getElementById("resetdone").style.display = hotovo ? "" : "none";
 
@@ -405,7 +408,9 @@ function renderTimeline(){
 
   document.getElementById("count").textContent =
     list.length ? list.length+" termínů" : "";
-  if(!list.length){ box.innerHTML='<div class="empty">Pro tenhle výběr nejsou žádné termíny.</div>'; return; }
+  if(!list.length){ box.innerHTML = hotovo
+    ? '<div class="empty">Všechno hotovo ✓</div>'
+    : '<div class="empty">Pro tenhle výběr nejsou žádné termíny.</div>'; return; }
 
   box.innerHTML = list.map(e=>{
     const d=dayDiff(e.date), b=BYTY.find(x=>x.id===e.flat) || (e.flat===AUTO.id ? AUTO : null);
@@ -937,7 +942,11 @@ document.getElementById("collapse").onclick = () => {
   renderCollapse();
 };
 
-document.getElementById("toggledone").onclick = () => { hideDone = !hideDone; renderTimeline(); };
+document.getElementById("toggledone").onclick = () => {
+  hideDone = !hideDone;
+  try { localStorage.setItem("p42-skryt-hotove", hideDone ? "1" : "0"); } catch(e){}
+  renderTimeline();
+};
 document.getElementById("resetdone").onclick = async () => {
   if(!confirm("Opravdu zrušit odškrtnutí všech úkolů? Platí i v Myší úkolárně.")) return;
   const r = await sb.from("tasks").update({ done:false }).like("ref","p42|%");
