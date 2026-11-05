@@ -130,7 +130,7 @@ h2{font-size:14px;text-transform:uppercase;letter-spacing:.07em;color:var(--mute
 .b-green{background:var(--green-soft);color:var(--green)}
 
 /* ---- karty bytů ---- */
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr));
   gap:0 16px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
   padding:0 0 12px;margin-bottom:16px;display:flex;flex-direction:column;overflow:hidden}
@@ -154,7 +154,7 @@ h2{font-size:14px;text-transform:uppercase;letter-spacing:.07em;color:var(--mute
 .house-row.tri{grid-column:span 3}
 @media (max-width:1000px){
   .house-row.tri{grid-column:1/-1;grid-row:auto;row-gap:0;
-    grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+    grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr))}
   @supports (grid-template-columns: subgrid){ .house-row.tri{grid-template-columns:subgrid} }
 }
 @media (max-width:660px){
@@ -208,7 +208,7 @@ h2{font-size:14px;text-transform:uppercase;letter-spacing:.07em;color:var(--mute
 
 .rows{display:flex;flex-direction:column;gap:5px}
 .row{display:flex;justify-content:space-between;gap:10px;font-size:13.5px}
-.row span:first-child{color:var(--muted);flex:0 0 auto}
+.row span:first-child{color:var(--muted);flex:0 1 auto;min-width:0}
 .row span:last-child{text-align:right;font-variant-numeric:tabular-nums;
   min-width:0;overflow-wrap:anywhere}
 .big{font-size:15px;font-weight:600}
@@ -237,16 +237,22 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);
 footer code{background:var(--grey-soft);padding:1px 5px;border-radius:4px;font-size:11.5px}
 
 @media (max-width:640px){
-  .ev{grid-template-columns:26px 1fr;gap:8px 12px}
-  .ev-when,.ev-flat{grid-column:2}
+  .ev{grid-template-columns:26px minmax(0,1fr);gap:8px 12px}
+  .ev input[type=checkbox]{grid-row:1 / span 3;align-self:start;margin-top:2px}
+  .ev-when,.ev-flat,.ev > div:nth-child(3){grid-column:2}
   .ev-flat{justify-self:start}
   .filters{flex-direction:column;gap:14px}
   .count{margin-left:0;align-self:flex-start}
 }
+/* dlouhé texty (čísla účtů, názvy) se zalomí, místo aby natahovaly kartu */
+.card,.ev,.platby{overflow-wrap:anywhere}
+.card,.card > *{min-width:0}
+.card.slots{grid-template-columns:minmax(0,1fr)}
 
 /* --- přihlášení a web --- */
 .nolink{font-size:12.5px;color:var(--muted);background:var(--grey-soft);border:1px solid transparent;
   padding:5px 10px;border-radius:7px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:default}
+@media (max-width:660px){ .links a,.nolink{white-space:normal;overflow-wrap:anywhere} }
 .login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
 .login form{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:28px 24px;width:100%;max-width:360px;
   box-shadow:0 4px 18px rgba(0,0,0,.06)}
