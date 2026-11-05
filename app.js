@@ -217,8 +217,16 @@ events.push({flat:AUTO.id, cat:"auto", date:AUTO.navrh.fotkyRadny,
 events.push({flat:AUTO.id, cat:"auto", date:AUTO.znamka.do,
   title:"Konec dálniční známky – auto (VW Sharan)",
   desc:"Roční elektronická známka platí do "+czDate(AUTO.znamka.do)+" 23:59. Novou kup předem na edalnice.gov.cz, počátek platnosti si zvolíš."});
-events.sort((a,b)=> a.date < b.date ? -1 : 1);
-events.forEach(e => e.id = e.flat+"|"+e.cat+"|"+e.date);
+events.sort((a,b)=> a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
+/* Každá událost má vlastní id (z něj je odkaz na úkol). Pokud je ve stejný den u stejného bytu a kategorie
+   víc událostí, první si nechá původní tvar (už založené úkoly zůstanou) a další dostanou na konec zkratku názvu. */
+function zkratkaNazvu(t){ let h=0; for(const ch of t) h=(h*31+ch.codePointAt(0))>>>0; return h.toString(36); }
+const _zakladId = {};
+events.forEach(e => {
+  const z = e.flat+"|"+e.cat+"|"+e.date;
+  _zakladId[z] = (_zakladId[z]||0) + 1;
+  e.id = _zakladId[z] === 1 ? z : z+"|"+zkratkaNazvu(e.title);
+});
 
 /* V seznamu „Co je potřeba řešit“ jen termíny od dneška do OKNO_MESICU dopředu.
    Proběhlé termíny a platby, které se platí samy (inkaso, trvalý příkaz, převod; inkaso:true), se nezobrazují. */
