@@ -400,6 +400,7 @@ function renderTimeline(){
   tg.textContent = hideDone ? `Zobrazit hotové (${hotovo})` : "Skrýt hotové";
   tg.style.display = hotovo ? "" : "none";
   document.getElementById("resetdone").style.display = hotovo ? "" : "none";
+  document.querySelector(".donebar").style.display = hotovo ? "" : "none";
 
   /* hotové dolů, případně schovat */
   if(hideDone) list = list.filter(e=>!done[e.id]);
@@ -412,7 +413,7 @@ function renderTimeline(){
     ? '<div class="empty">Všechno hotovo ✓</div>'
     : '<div class="empty">Pro tenhle výběr nejsou žádné termíny.</div>'; return; }
 
-  box.innerHTML = list.map(e=>{
+  box.innerHTML = '<div class="ev-head"><span></span><span>Kdy</span><span>Co</span><span>Kde</span></div>' + list.map(e=>{
     const d=dayDiff(e.date), b=BYTY.find(x=>x.id===e.flat) || (e.flat===AUTO.id ? AUTO : null);
     const past = d<0, isDone = !!done[e.id];
     return `<div class="ev ${isDone?'done':past?'blue':tone(d)}">

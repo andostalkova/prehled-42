@@ -72,6 +72,7 @@ h2{font-size:14px;text-transform:uppercase;letter-spacing:.07em;color:var(--mute
   margin:34px 0 12px;font-weight:600}
 .h2row{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin:34px 0 12px}
 .h2row h2{margin:0}
+.toprow .h2row{min-height:26px;align-items:center;margin-top:34px}
 .collapsebtn{background:none;border:1px solid var(--line);color:var(--muted);
   font:inherit;font-size:12px;padding:3px 11px;border-radius:999px;cursor:pointer;
   letter-spacing:.02em}
@@ -81,23 +82,28 @@ h2{font-size:14px;text-transform:uppercase;letter-spacing:.07em;color:var(--mute
 /* Co je potřeba řešit (vlevo) a Platby (vpravo) vedle sebe; na úzkém displeji pod sebou */
 .toprow{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(320px,1fr);column-gap:22px;align-items:start}
 @media (max-width:900px){ .toprow{grid-template-columns:minmax(0,1fr)} }
-.tl{display:flex;flex-direction:column;gap:6px}
+/* úkoly jako panel s řádky, stejně jako Platby */
+#ukoly{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:10px 14px 6px}
+.tl{display:flex;flex-direction:column}
+.ev-head{display:grid;grid-template-columns:20px 92px 1fr auto;gap:10px;padding:2px 4px 6px 4px;
+  border-bottom:1px solid var(--line);font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;
+  color:var(--muted);font-weight:600}
 .ev{display:grid;grid-template-columns:20px 92px 1fr auto;gap:10px;align-items:center;
-  background:var(--card);border:1px solid var(--line);border-left:4px solid var(--line);
-  border-radius:10px;padding:7px 12px;transition:opacity .15s}
+  border:0;border-bottom:1px solid var(--line);
+  padding:8px 4px 8px 4px;transition:opacity .15s}
+.tl > .ev:last-child{border-bottom:0}
 .ev input[type=checkbox]{width:17px;height:17px;accent-color:var(--green);cursor:pointer;margin:0}
-.ev.done{opacity:.5;border-left-color:var(--green)}
+.ev.done{opacity:.5}
 .ev.done .ev-title{text-decoration:line-through}
+.donebar progress,#progtext{display:none}
 .donebar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;
-  margin:0 0 12px;font-size:13px;color:var(--muted)}
+  margin:0 0 8px;font-size:13px;color:var(--muted)}
 .donebar progress{width:150px;height:7px;accent-color:var(--green)}
 .linkbtn{background:none;border:0;color:var(--accent);font:inherit;font-size:13px;
   cursor:pointer;padding:0;text-decoration:underline}
 .linkbtn:hover{opacity:.75}
 .note{background:var(--amber-soft);color:var(--amber);border-radius:8px;
   padding:9px 12px;font-size:12.5px;margin-bottom:12px}
-.ev.red{border-left-color:var(--red)} .ev.amber{border-left-color:var(--amber)}
-.ev.green{border-left-color:var(--green)} .ev.blue{border-left-color:var(--accent)}
 .ev-when{font-variant-numeric:tabular-nums}
 .ev-date{font-weight:600;font-size:13px}
 .ev-in{font-size:11.5px;color:var(--muted)}
@@ -247,6 +253,7 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);
 footer code{background:var(--grey-soft);padding:1px 5px;border-radius:4px;font-size:11.5px}
 
 @media (max-width:640px){
+  .ev-head{display:none}
   .ev{grid-template-columns:26px minmax(0,1fr);gap:8px 12px}
   .ev input[type=checkbox]{grid-row:1 / span 3;align-self:start;margin-top:2px}
   .ev-when,.ev-flat,.ev > div:nth-child(3){grid-column:2}
@@ -391,7 +398,7 @@ async function spustApp(){
   if (!appLoaded) {
     appLoaded = true;
     const s = document.createElement('script');
-    s.src = 'app.js?v=4';
+    s.src = 'app.js?v=6';
     s.onerror = () => { appLoaded = false; ukazPrihlaseni('Nepodařilo se načíst aplikaci.'); };
     document.body.appendChild(s);
   }
