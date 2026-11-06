@@ -511,16 +511,13 @@ function renderCards(){
       zalohyBlok=`<div class="block blk-zalohy">
         <div class="btitle">Služby měsíčně</div>
         <div class="rows">
-          <div class="row"><span>Ve smlouvě</span><span class="big">${kc(b.zalohySmlouva)}</span></div>
-          <div class="row"><span></span><span style="color:var(--muted);font-size:12px">zdroj: smlouva s nájemníkem</span></div>
-          <div class="row"><span>Aktuální vyúčtování celkem</span><span class="big">${kcH(b.predpisCelkem||b.zalohy)}</span></div>
-          ${b.fondOprav!=null?`<div class="row"><span>z toho Fond oprav (FO)</span><span>${kcH(b.fondOprav)}</span></div>
-          ${b.plocha?`<div class="row"><span>Fond oprav na m²</span><span>${(b.fondOprav/b.plocha).toLocaleString("cs-CZ",{minimumFractionDigits:2,maximumFractionDigits:2})} Kč/m²</span></div>
-          <div class="row"><span></span><span style="color:var(--muted);font-size:12px">plocha bytu ${b.plocha.toLocaleString("cs-CZ")} m²</span></div>`:""}
-          <div class="row"><span>Aktuální vyúčtování bez FO</span><span class="big">${kcH((b.predpisCelkem||b.zalohy)-b.fondOprav)}</span></div>`:""}
-          <div class="row"><span>platné od</span><span>${czDate(b.zalohyOd)}</span></div>
-          ${b.predpisCelkem && b.predpisCelkem!==b.zalohy?`<div class="row"><span></span><span style="color:var(--muted);font-size:12px">z toho nájemník ${kc(b.zalohy)}, zbytek vlastník</span></div>`:""}
-          <div class="row"><span></span><span>${(()=>{
+          <div class="row key"><span>Ve smlouvě</span><span>${kc(b.zalohySmlouva)}</span></div>
+          <hr class="sep">
+          <div class="row key"><span>Aktuální vyúčtování celkem</span><span>${kcH(b.predpisCelkem||b.zalohy)}</span></div>
+          ${b.fondOprav!=null?`<div class="row minor sub"><span>z toho Fond oprav (FO)</span><span>${kcH(b.fondOprav)}${b.plocha?` · ${(b.fondOprav/b.plocha).toLocaleString("cs-CZ",{minimumFractionDigits:2,maximumFractionDigits:2})} Kč/m²`:""}</span></div>
+          <div class="row key"><span>Aktuální vyúčtování bez FO</span><span>${kcH((b.predpisCelkem||b.zalohy)-b.fondOprav)}</span></div>`:""}
+          <hr class="sep">
+          <div class="row minor"><span></span><span>${(()=>{
             // rozdíl se počítá z aktuálního vyúčtování bez FO proti záloze uvedené ve smlouvě
             const zaklad = b.fondOprav!=null ? (b.predpisCelkem||b.zalohy)-b.fondOprav : b.zalohy;
             const rozdil = Math.round((zaklad-b.zalohySmlouva)*100)/100;
@@ -529,8 +526,10 @@ function renderCards(){
               : rozdil<0
               ? `<span class="badge b-amber" style="margin-left:0;font-weight:400">Nájemníkovi se má snížit platba za služby o: ${kcH(-rozdil)}</span>`
               : `<span class="badge b-green" style="margin-left:0;font-weight:400">Nájemníkovi se platba za služby nemění (0 Kč)</span>`;})()}</span></div>
-          <div class="row"><span></span><span style="color:var(--muted);font-size:12px">zdroj: ${b.fondOprav!=null?"evidenční / výpočtový list správce":"nové vyúčtování"}</span></div>
-          <div class="row"><span>Platit na účet SVJ / VS</span><span>${b.ucet}<br>${b.vs}</span></div>
+          <div class="row minor"><span>platné od</span><span>${czDate(b.zalohyOd)}</span></div>
+          ${b.predpisCelkem && b.predpisCelkem!==b.zalohy?`<div class="row minor"><span>nájemník platí</span><span>${kc(b.zalohy)}, zbytek vlastník</span></div>`:""}
+          <div class="row minor"><span>zdroj</span><span>${b.fondOprav!=null?"smlouva, evidenční / výpočtový list správce":"smlouva, nové vyúčtování"}</span></div>
+          <div class="row minor"><span>Platit na účet SVJ / VS</span><span>${b.ucet}<br>${b.vs}</span></div>
         </div>
       </div>`;
       sprava=`<div class="block blk-vyuct">
