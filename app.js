@@ -932,16 +932,20 @@ function renderPlatby(){
   rows.sort((a,b)=> (a.jednou?0:1)-(b.jednou?0:1) || a.den-b.den);
   const ZP = { csob:'<span class="zp zp-ink">trvalý příkaz z ČSOB</span>', marekkb:'<span class="zp zp-ink">Marek KB</span>',
                ansporka:'<span class="zp zp-ink">An – Spořka</span>', prevod:'<span class="zp zp-prev">převod</span>' };
-  const tr = rows.map(r=>`<tr>
+  // platby s trvalým příkazem z ČSOB se v seznamu neukazují (platí se samy), do souhrnu níže se ale počítají
+  const videt = rows.filter(r=>r.zp!=="csob");
+  const tr = videt.map(r=>`<tr>
       <td style="white-space:nowrap">${r.kdy}</td>
       <td>${r.co}<span class="kde">${r.kde}</span></td>
       <td class="num">${r.pribl?"≈ ":""}${kc(r.kc)}</td>
       <td>${ZP[r.zp]||'<span class="zp zp-nev">neověřeno</span>'}</td></tr>`).join("");
   const mesicne = rows.filter(r=>!r.jednou);
   const sum = f => mesicne.filter(f).reduce((s,r)=>s+r.kc,0);
-  document.getElementById("platby").innerHTML = `<table class="pt"><thead><tr>
-      <th>Kdy</th><th>Co</th><th class="num">Kolik</th><th>Jak</th></tr></thead><tbody>${tr}</tbody></table>
-    <div class="pt-sum">Měsíčně celkem <b>${kc(sum(()=>true))}</b>, z toho trvalým příkazem z ČSOB ${kc(sum(r=>r.zp==="csob"))}.
+  document.getElementById("platby").innerHTML = (videt.length
+    ? `<table class="pt"><thead><tr>
+      <th>Kdy</th><th>Co</th><th class="num">Kolik</th><th>Jak</th></tr></thead><tbody>${tr}</tbody></table>`
+    : `<div class="empty">Žádná platba k ručnímu zaplacení.</div>`) + `
+    <div class="pt-sum">Měsíčně celkem <b>${kc(sum(()=>true))}</b>, z toho trvalým příkazem z ČSOB ${kc(sum(r=>r.zp==="csob"))} (v seznamu nejsou).
       Do ${czDate(KONEC_OKNA)} ${rows.some(r=>r.jednou)?"je navíc výše jednorázová platba.":"nepřipadá žádné roční pojistné."}</div>`;
 }
 
