@@ -522,10 +522,11 @@ function renderCards(){
             // rozdíl se počítá z aktuálního vyúčtování bez FO proti záloze uvedené ve smlouvě
             const zaklad = b.fondOprav!=null ? (b.predpisCelkem||b.zalohy)-b.fondOprav : b.zalohy;
             const rozdil = Math.round((zaklad-b.zalohySmlouva)*100)/100;
-            const co = b.fondOprav!=null ? "bez FO" : "nájemník";
-            return rozdil!==0
-              ? `<span class="badge b-amber" style="margin-left:0">${co}: liší se od smlouvy o ${rozdil>0?"+":"−"}${kcH(Math.abs(rozdil))}</span>`
-              : `<span class="badge b-green" style="margin-left:0">${co}: neliší se od smlouvy (0 Kč)</span>`;})()}</span></div>
+            return rozdil>0
+              ? `<span class="badge b-amber" style="margin-left:0">Nájemníkovi se má zvýšit platba za služby o: ${kcH(rozdil)}</span>`
+              : rozdil<0
+              ? `<span class="badge b-amber" style="margin-left:0">Nájemníkovi se má snížit platba za služby o: ${kcH(-rozdil)}</span>`
+              : `<span class="badge b-green" style="margin-left:0">Nájemníkovi se platba za služby nemění (0 Kč)</span>`;})()}</span></div>
           <div class="row"><span></span><span style="color:var(--muted);font-size:12px">zdroj: ${b.fondOprav!=null?"evidenční / výpočtový list správce":"nové vyúčtování"}</span></div>
           <div class="row"><span>Platit na účet SVJ / VS</span><span>${b.ucet}<br>${b.vs}</span></div>
         </div>
