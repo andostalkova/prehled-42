@@ -759,8 +759,7 @@ function renderCards(){
             </div>`).join('<div style="border-top:1px solid var(--line);margin:10px 0"></div>')}
         </div>` : "";
 
-    const h = b.hypo;
-    const hypoBlok = h ? `<div class="block blk-hypo"><div class="btitle">Hypotéka</div>
+    const hypoHTML = (h, titulek) => h ? `<div class="block blk-hypo"><div class="btitle">${titulek}</div>
         <div class="rows">
           ${h.castka != null?`<div class="row"><span>Výše úvěru</span><span class="big">${kc(h.castka)}</span></div>`:""}
           <div class="row"><span>Splátka</span><span class="big">${h.splatka != null ? kc(h.splatka) : "zatím neověřeno"}</span></div>
@@ -773,9 +772,14 @@ function renderCards(){
           <div class="row"><span>${h.splatnostPopis || "Splatnost do"}</span><span>${h.splatnostDo ? czDate(h.splatnostDo) : "zatím neověřeno"}</span></div>
           ${h.pocetSplatek?`<div class="row"><span>Počet splátek</span><span>${h.pocetSplatek}</span></div>`:""}
           ${h.prvniSplatka?`<div class="row"><span>První splátka</span><span>${czDate(h.prvniSplatka)}</span></div>`:""}
+          ${h.cerpaniDo?`<div class="row"><span>Čerpat do</span><span>${czDate(h.cerpaniDo)}</span></div>`:""}
         </div>
         ${h.pozn?`<div class="warnbox" style="margin-top:8px">${h.pozn}</div>`:""}
       </div>` : "";
+    // Po refinancování má byt dvě hypotéky pod sebou: současná (nyní) a nová (po refinancování)
+    const hypoBlok = b.hypoNova
+      ? hypoHTML(b.hypo, `Hypotéka – nyní (${b.hypo.banka})`) + hypoHTML(b.hypoNova, `Hypotéka – po refinancování (${b.hypoNova.banka})`)
+      : hypoHTML(b.hypo, "Hypotéka");
 
     const patri = c => fCat==="all" || (Array.isArray(c) ? c.includes(fCat) : c===fCat);
     const hlavicka = `<div class="cardhead">
