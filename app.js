@@ -577,7 +577,26 @@ function renderCards(){
       zalohyBlok=`<div class="block blk-zalohy">
         <div class="btitle">Služby měsíčně</div>
         <div class="rows">
-          <div class="row"><span>Plánováno měsíčně</span><span class="big">${kc(b.zalohy)}</span></div>
+          ${(()=>{
+            // Lužiny: stejné rozvržení jako u pronajatých bytů, hodnoty se doplní, až budou (smlouva s nájemníkem, evidenční list správce)
+            const nic = '<span class="nic">zatím neověřeno</span>';
+            const zs = b.zalohySmlouva, pc = b.predpisCelkem, fo = b.fondOprav;
+            const bezFO = (pc!=null && fo!=null) ? pc-fo : null;
+            const rozdil = (bezFO!=null && zs!=null) ? Math.round((bezFO-zs)*100)/100 : null;
+            const stitek = rozdil==null ? "" : rozdil>0
+              ? `<span class="badge b-amber" style="margin-left:0;font-weight:400">Nájemníkovi se má zvýšit platba za služby o: ${kcH(rozdil)}</span>`
+              : rozdil<0
+              ? `<span class="badge b-amber" style="margin-left:0;font-weight:400">Nájemníkovi se má snížit platba za služby o: ${kcH(-rozdil)}</span>`
+              : `<span class="badge b-green" style="margin-left:0;font-weight:400">Nájemníkovi se platba za služby nemění (0 Kč)</span>`;
+            return `<div class="row key"><span>Ve smlouvě</span>${zs!=null?`<span>${kc(zs)}</span>`:nic}</div>
+          <hr class="sep">
+          <div class="row key"><span>Aktuální vyúčtování celkem</span>${pc!=null?`<span>${kcH(pc)}</span>`:nic}</div>
+          <div class="row minor sub"><span>z toho Fond oprav (FO)</span><span>${fo!=null?kcH(fo)+(b.plocha?` · ${(fo/b.plocha).toLocaleString("cs-CZ",{minimumFractionDigits:2,maximumFractionDigits:2})} Kč/m²`:""):"zatím neověřeno"}</span></div>
+          <div class="row key"><span>Aktuální vyúčtování bez FO</span>${bezFO!=null?`<span>${kcH(bezFO)}</span>`:nic}</div>
+          <hr class="sep">
+          ${stitek?`<div class="row minor"><span></span><span>${stitek}</span></div>`:""}
+          <div class="row minor"><span>plánováno měsíčně (odhad)</span><span>${kc(b.zalohy)}</span></div>
+          <div class="row minor"><span>Platit na účet SVJ / VS</span><span>${b.ucet?`${b.ucet}<br>${b.vs}`:"zatím neověřeno"}</span></div>`;})()}
         </div>
       </div>`;
     }

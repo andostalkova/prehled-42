@@ -234,6 +234,7 @@ h2{font-size:14px;text-transform:uppercase;letter-spacing:.07em;color:var(--mute
 .blk-zalohy .row.key span:last-child{font-size:17px;font-weight:600}
 .blk-zalohy .row.minor{font-size:12px}
 .blk-zalohy .row.minor span{color:var(--muted);opacity:.9}
+.blk-zalohy .row.key span.nic:last-child{font-size:12px;font-weight:400;color:var(--muted)}
 .blk-zalohy .row.sub{padding-left:12px}
 .blk-zalohy .sep{border:0;border-top:1px solid var(--line);margin:5px 0}
 
@@ -406,7 +407,7 @@ async function spustApp(){
   if (!appLoaded) {
     appLoaded = true;
     const s = document.createElement('script');
-    s.src = 'app.js?v=15';
+    s.src = 'app.js?v=16';
     s.onerror = () => { appLoaded = false; ukazPrihlaseni('Nepodařilo se načíst aplikaci.'); };
     document.body.appendChild(s);
   }
