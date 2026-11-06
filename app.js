@@ -11,6 +11,7 @@ const czDate = s => { const d=new Date(s+"T00:00:00");
   return d.toLocaleDateString("cs-CZ",{day:"numeric",month:"numeric",year:"numeric"}); };
 const dayDiff = s => Math.round((new Date(s+"T00:00:00") - TODAY)/DAY);
 const kc = n => n.toLocaleString("cs-CZ")+" Kč";
+const kcH = n => n.toLocaleString("cs-CZ",{minimumFractionDigits:Number.isInteger(n)?0:2, maximumFractionDigits:2})+" Kč";   // s haléři, když jsou
 const pad = n => String(n).padStart(2,"0");
 const minusMonths = (s,m) => { const d=new Date(s+"T00:00:00"); d.setMonth(d.getMonth()-m);
   return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); };
@@ -512,13 +513,15 @@ function renderCards(){
         <div class="rows">
           <div class="row"><span>Ve smlouvě</span><span class="big">${kc(b.zalohySmlouva)}</span></div>
           <div class="row"><span></span><span style="color:var(--muted);font-size:12px">zdroj: smlouva s nájemníkem</span></div>
-          <div class="row"><span>Nová výše</span><span class="big">${kc(b.predpisCelkem||b.zalohy)}</span></div>
-          <div class="row"><span>od</span><span>${czDate(b.zalohyOd)}</span></div>
+          <div class="row"><span>Aktuální vyúčtování celkem</span><span class="big">${kcH(b.predpisCelkem||b.zalohy)}</span></div>
+          ${b.fondOprav!=null?`<div class="row"><span>z toho Fond oprav (FO)</span><span>${kcH(b.fondOprav)}</span></div>
+          <div class="row"><span>Aktuální vyúčtování bez FO</span><span class="big">${kcH((b.predpisCelkem||b.zalohy)-b.fondOprav)}</span></div>`:""}
+          <div class="row"><span>platné od</span><span>${czDate(b.zalohyOd)}</span></div>
           ${b.predpisCelkem && b.predpisCelkem!==b.zalohy?`<div class="row"><span></span><span style="color:var(--muted);font-size:12px">z toho nájemník ${kc(b.zalohy)}, zbytek vlastník</span></div>`:""}
           <div class="row"><span></span><span>${b.zalohy!==b.zalohySmlouva
             ? `<span class="badge b-amber" style="margin-left:0">nájemník: liší se od smlouvy o ${b.zalohy-b.zalohySmlouva>0?"+":"−"}${kc(Math.abs(b.zalohy-b.zalohySmlouva))}</span>`
             : `<span class="badge b-green" style="margin-left:0">nájemník: neliší se od smlouvy (0 Kč)</span>`}</span></div>
-          <div class="row"><span></span><span style="color:var(--muted);font-size:12px">zdroj: nové vyúčtování</span></div>
+          <div class="row"><span></span><span style="color:var(--muted);font-size:12px">zdroj: ${b.fondOprav!=null?"evidenční / výpočtový list správce":"nové vyúčtování"}</span></div>
           <div class="row"><span>Platit na účet SVJ / VS</span><span>${b.ucet}<br>${b.vs}</span></div>
         </div>
       </div>`;
