@@ -398,7 +398,7 @@ async function spustApp(){
   if (!appLoaded) {
     appLoaded = true;
     const s = document.createElement('script');
-    s.src = 'app.js?v=10';
+    s.src = 'app.js?v=11';
     s.onerror = () => { appLoaded = false; ukazPrihlaseni('Nepodařilo se načíst aplikaci.'); };
     document.body.appendChild(s);
   }
