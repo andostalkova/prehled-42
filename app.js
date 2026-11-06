@@ -767,8 +767,9 @@ function renderCards(){
           <div class="row"><span>Odkud se platí</span><span>${h.ucet || "zatím neověřeno"}</span></div>
           <div class="row"><span>Banka a úvěr</span><span>${h.banka || "zatím neověřeno"}<br>${h.cislo ? `č. ${h.cislo}` : "číslo smlouvy neuvedeno"}</span></div>
           <div class="row"><span>Sazba</span><span>${h.sazba || "zatím neověřeno"}</span></div>
-          <div class="row"><span>Fixace do</span><span>${h.fixaceDo ? `${czDate(h.fixaceDo)}
+          <div class="row"><span>Fixace do</span><span>${h.fixaceDo ? `${czDate(h.fixaceDo)}${h.fixaceDelka?` · ${h.fixaceDelka}`:""}
             <span class="badge b-amber">${relText(dayDiff(h.fixaceDo))}</span>` : "zatím neověřeno"}</span></div>
+          ${h.fixaceDelkaPozn?`<div class="row"><span>Délka fixace</span><span>${h.fixaceDelkaPozn}</span></div>`:""}
           <div class="row"><span>${h.splatnostPopis || "Splatnost do"}</span><span>${h.splatnostDo ? czDate(h.splatnostDo) : "zatím neověřeno"}</span></div>
           ${h.pocetSplatek?`<div class="row"><span>Počet splátek</span><span>${h.pocetSplatek}</span></div>`:""}
           ${h.prvniSplatka?`<div class="row"><span>První splátka</span><span>${czDate(h.prvniSplatka)}</span></div>`:""}
