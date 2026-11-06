@@ -515,6 +515,8 @@ function renderCards(){
           <div class="row"><span></span><span style="color:var(--muted);font-size:12px">zdroj: smlouva s nájemníkem</span></div>
           <div class="row"><span>Aktuální vyúčtování celkem</span><span class="big">${kcH(b.predpisCelkem||b.zalohy)}</span></div>
           ${b.fondOprav!=null?`<div class="row"><span>z toho Fond oprav (FO)</span><span>${kcH(b.fondOprav)}</span></div>
+          ${b.plocha?`<div class="row"><span>Fond oprav na m²</span><span class="big">${(b.fondOprav/b.plocha).toLocaleString("cs-CZ",{minimumFractionDigits:2,maximumFractionDigits:2})} Kč/m²</span></div>
+          <div class="row"><span></span><span style="color:var(--muted);font-size:12px">plocha bytu ${b.plocha.toLocaleString("cs-CZ")} m²</span></div>`:""}
           <div class="row"><span>Aktuální vyúčtování bez FO</span><span class="big">${kcH((b.predpisCelkem||b.zalohy)-b.fondOprav)}</span></div>`:""}
           <div class="row"><span>platné od</span><span>${czDate(b.zalohyOd)}</span></div>
           ${b.predpisCelkem && b.predpisCelkem!==b.zalohy?`<div class="row"><span></span><span style="color:var(--muted);font-size:12px">z toho nájemník ${kc(b.zalohy)}, zbytek vlastník</span></div>`:""}
