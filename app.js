@@ -465,6 +465,52 @@ function linkRow(pairs){
   }).join("")}</div>`;
 }
 
+/* Jednotný styl bloků: důležité řádky (podle názvu bloku a popisku) jsou větší a tučné a jdou nahoru,
+   vedlejší jsou menší a světlejší. Blok Služby měsíčně má třídy key / minor přímo v šabloně a přeskakuje se. */
+const KLICOVE = {
+  "Nájemník": ["Kdo","Zbývá"],
+  "Nájem měsíčně": ["Nájem"],
+  "Plánované nájemné": ["Nájem"],
+  "Stav": ["Fáze","Plánovaný pronájem od"],
+  "Čerpání úvěru": ["Výše úvěru","Čerpat do"],
+  "Správce": ["Správce"],
+  "Služby vyúčtování": ["Vyúčtování přijde","Poslední ("],
+  "Pojištění": ["@první","Výročí"],
+  "Hypotéka": ["Splátka","Sazba","Fixace do"],
+  "Energie": ["Platnost","Záloha","Poslední vyúčtování","Pevná cena do"],
+  "Voda": ["Záloha","Další splatná","Celkem s DPH","Doplatek"],
+  "Identifikace": []
+};
+function stylujBloky(root){
+  root.querySelectorAll(".block").forEach(blok=>{
+    if(blok.querySelector(".row.key")) return;
+    const t = (blok.querySelector(".btitle")||{}).textContent;
+    const nazev = (t||"").trim();
+    const k = Object.keys(KLICOVE).find(x=>nazev===x || nazev.startsWith(x+" –"));
+    if(!k) return;
+    const labely = KLICOVE[k];
+    if(k==="Nájemník"){      // „Zbývá“ je v šabloně mimo seznam řádků, přesuň ho k ostatním
+      const zb = [...blok.children].find(e=>e.classList.contains("row")), rows = blok.querySelector(".rows");
+      if(zb && rows) rows.appendChild(zb);
+    }
+    blok.querySelectorAll(".rows").forEach(rows=>{
+      const radky = [...rows.children].filter(e=>e.classList.contains("row"));
+      const ostatni = [...rows.children].filter(e=>!e.classList.contains("row"));
+      const klic=[], vedl=[];
+      radky.forEach((r,i)=>{
+        const lab = r.firstElementChild.textContent.trim();
+        const je = labely.some(l=> l==="@první" ? i===0 : l.endsWith("(") ? lab.startsWith(l) : lab===l);
+        r.classList.add(je?"key":"minor");
+        r.querySelectorAll(".big").forEach(e=>e.classList.remove("big"));
+        (je?klic:vedl).push(r);
+      });
+      const sep = [];
+      if(klic.length && vedl.length){ const hr=document.createElement("hr"); hr.className="sep"; sep.push(hr); }
+      rows.replaceChildren(...klic, ...sep, ...vedl, ...ostatni);
+    });
+  });
+}
+
 /* Bloky karty nesou kategorii. Při filtrování se ukáže jen ta, která odpovídá.
    Klíče musí sedět s CATS: smlouva / vyuct / zalohy / hypo.              */
 function renderCards(){
@@ -817,6 +863,7 @@ function renderCards(){
        <div class="addr">Formuláře, šablony a přehledy pro všechny nemovitosti</div></div>
        <div class="block blk-dok">${linkRow(OBECNE)}</div></div>`);
   }
+  stylujBloky(box);
 }
 
 /* --- sbalení celé sekce s úkoly --- */

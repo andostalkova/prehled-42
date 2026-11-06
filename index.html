@@ -229,14 +229,15 @@ h2{font-size:14px;text-transform:uppercase;letter-spacing:.07em;color:var(--mute
   min-width:0;overflow-wrap:anywhere}
 .big{font-size:15px;font-weight:600}
 
-/* blok Služby měsíčně: tři důležité částky (key) vynikají, zbytek (minor) je menší a světlejší */
-.blk-zalohy .row.key span:first-child{color:var(--ink-soft);font-size:14px}
-.blk-zalohy .row.key span:last-child{color:var(--ink-soft);font-size:15.5px;font-weight:600}
-.blk-zalohy .row.minor{font-size:12px}
-.blk-zalohy .row.minor span{color:var(--muted);opacity:.9}
-.blk-zalohy .row.key span.nic:last-child{font-size:12px;font-weight:400;color:var(--muted)}
-.blk-zalohy .row.sub{padding-left:12px}
-.blk-zalohy .sep{border:0;border-top:1px solid var(--line);margin:5px 0}
+/* jednotný styl bloků: důležité údaje (key) vynikají, vedlejší (minor) jsou menší a světlejší */
+.block .row.key > span:first-child{color:var(--ink-soft);font-size:14px}
+.block .row.key > span:last-child{color:var(--ink-soft);font-size:15.5px;font-weight:600}
+.block .row.minor{font-size:12px}
+.block .row.minor > span{color:var(--muted);opacity:.9}
+.block .row.key > span.nic:last-child{font-size:12px;font-weight:400;color:var(--muted)}
+.block .row.key .badge, .block .row.minor .badge{font-size:11px;font-weight:400}
+.block .row.sub{padding-left:12px}
+.block .sep{border:0;border-top:1px solid var(--line);margin:5px 0}
 
 .bar{height:6px;background:var(--grey-soft);border-radius:99px;overflow:hidden;margin:9px 0 6px}
 .bar i{display:block;height:100%;background:var(--accent);border-radius:99px}
@@ -407,7 +408,7 @@ async function spustApp(){
   if (!appLoaded) {
     appLoaded = true;
     const s = document.createElement('script');
-    s.src = 'app.js?v=17';
+    s.src = 'app.js?v=18';
     s.onerror = () => { appLoaded = false; ukazPrihlaseni('Nepodařilo se načíst aplikaci.'); };
     document.body.appendChild(s);
   }
