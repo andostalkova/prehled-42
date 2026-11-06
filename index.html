@@ -10,7 +10,7 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏠</text></svg>">
 <style>
 :root{
-  --bg:#f6f7f9; --card:#ffffff; --ink:#16181d; --muted:#6b7280; --line:#e4e7ec;
+  --bg:#f6f7f9; --card:#ffffff; --ink:#16181d; --ink-soft:#3f4756; --muted:#6b7280; --line:#e4e7ec;
   --accent:#2f5fd0; --accent-soft:#eaf0fd;
   --red:#c0392b; --red-soft:#fdecea;
   --amber:#a76b00; --amber-soft:#fdf3e0;
@@ -32,7 +32,7 @@
 }
 @media (prefers-color-scheme: dark){
   :root{
-    --bg:#14161a; --card:#1c1f25; --ink:#e8eaee; --muted:#9aa1ad; --line:#2c313a;
+    --bg:#14161a; --card:#1c1f25; --ink:#e8eaee; --ink-soft:#c3c8d2; --muted:#9aa1ad; --line:#2c313a;
     --accent:#7ba3f5; --accent-soft:#1e2739;
     --red:#f08a7e; --red-soft:#33211f;
     --amber:#e0b263; --amber-soft:#302818;
@@ -230,8 +230,8 @@ h2{font-size:14px;text-transform:uppercase;letter-spacing:.07em;color:var(--mute
 .big{font-size:15px;font-weight:600}
 
 /* blok Služby měsíčně: tři důležité částky (key) vynikají, zbytek (minor) je menší a světlejší */
-.blk-zalohy .row.key span:first-child{color:var(--ink);font-size:15px}
-.blk-zalohy .row.key span:last-child{font-size:17px;font-weight:600}
+.blk-zalohy .row.key span:first-child{color:var(--ink-soft);font-size:14px}
+.blk-zalohy .row.key span:last-child{color:var(--ink-soft);font-size:15.5px;font-weight:600}
 .blk-zalohy .row.minor{font-size:12px}
 .blk-zalohy .row.minor span{color:var(--muted);opacity:.9}
 .blk-zalohy .row.key span.nic:last-child{font-size:12px;font-weight:400;color:var(--muted)}
@@ -407,7 +407,7 @@ async function spustApp(){
   if (!appLoaded) {
     appLoaded = true;
     const s = document.createElement('script');
-    s.src = 'app.js?v=16';
+    s.src = 'app.js?v=17';
     s.onerror = () => { appLoaded = false; ukazPrihlaseni('Nepodařilo se načíst aplikaci.'); };
     document.body.appendChild(s);
   }
