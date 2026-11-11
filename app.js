@@ -35,6 +35,22 @@ const CATS = {
   energie:  "Energie"
 };
 
+const obdobiText = m => m===12 ? "ročně" : m===6 ? "pololetně" : m===3 ? "čtvrtletně" : m===1 ? "měsíčně" : "každých "+m+" měsíců";
+/* Nejbližší budoucí platba pojistného auta. S polem dalsiPlatba se počítá od něj (už zaplacené období se přeskočí),
+   jinak od výročí smlouvy. Interval je platbaMesicu, když chybí, tak obdobiMesicu. */
+function dalsiPlatbaAuta(p){
+  const m = p.platbaMesicu || p.obdobiMesicu;
+  let d;
+  if(p.dalsiPlatba){
+    d = new Date(p.dalsiPlatba+"T00:00:00");
+    while(d < TODAY) d.setMonth(d.getMonth()+m);
+  } else {
+    d = new Date(dalsiVyroci(p.vyrociDen,p.vyrociMesic)+"T00:00:00");
+    while(d > TODAY) d.setMonth(d.getMonth()-m);
+    d.setMonth(d.getMonth()+m);
+  }
+  return d;
+}
 /* Nejbližší budoucí výročí – den a měsíc se opakují každý rok. */
 function dalsiVyroci(den, mesic){
   const rok = TODAY.getFullYear();
@@ -209,12 +225,21 @@ events.push({flat:AUTO.id, cat:"auto", date:minusMonths(AUTO.stk.dalsi, UPOZORNE
 events.push({flat:AUTO.id, cat:"auto", date:AUTO.stk.dalsi,
   title:"Konec platnosti STK – auto (VW Sharan)",
   desc:"Poslední prohlídka "+czDate(AUTO.stk.posledni)+" bez závad, stav tachometru "+AUTO.stk.km+"."});
-events.push({flat:AUTO.id, cat:"auto", date:AUTO.navrh.zacatek,
-  title:"Pojištění auta – začátek nové smlouvy (Kooperativa)",
-  desc:"Nová smlouva z modelace ze dne "+czDate(AUTO.navrh.vytvoreno)+" začíná "+czDate(AUTO.navrh.zacatek)+", "+kc(AUTO.navrh.rocne)+" za rok. Podepiš návrh beze změn a ověř ukončení staré smlouvy z 2019."});
-events.push({flat:AUTO.id, cat:"auto", date:AUTO.navrh.fotkyRadny,
-  title:"Fotky auta a techničáku pro Kooperativu",
-  desc:"Pošli přes odkaz v SMS do "+czDate(AUTO.navrh.fotkyRadny)+" (náhradní termín "+czDate(AUTO.navrh.fotkyNahradni)+"). Jinak spoluúčast 90 %, po náhradním termínu zaniká havárie a výmol."});
+if(AUTO.navrh){
+  events.push({flat:AUTO.id, cat:"auto", date:AUTO.navrh.zacatek,
+    title:"Pojištění auta – začátek nové smlouvy (Kooperativa)",
+    desc:"Nová smlouva z modelace ze dne "+czDate(AUTO.navrh.vytvoreno)+" začíná "+czDate(AUTO.navrh.zacatek)+", "+kc(AUTO.navrh.rocne)+" za rok. Podepiš návrh beze změn a ověř ukončení staré smlouvy z 2019."});
+} else if(AUTO.pojisteni){
+  const p=AUTO.pojisteni, d=dalsiPlatbaAuta(p);
+  events.push({flat:AUTO.id, cat:"auto", date:d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()),
+    title:"Pojištění auta – pojistné ("+p.pojistovna+")",
+    desc:"Smlouva č. "+p.cislo+", "+kc(p.splatka)+" "+obdobiText(p.platbaMesicu||p.obdobiMesicu)+" ("+kc(p.rocne)+" za rok). Výročí smlouvy je "+p.vyrociDen+". "+p.vyrociMesic+"., k výročí jde pojistku bez sankce vypovědět."});
+}
+const fotky = AUTO.navrh || AUTO.pojisteni || {};
+if(fotky.fotkyRadny)
+  events.push({flat:AUTO.id, cat:"auto", date:fotky.fotkyRadny,
+    title:"Fotky auta a techničáku pro Kooperativu",
+    desc:"Pošli přes odkaz v SMS do "+czDate(fotky.fotkyRadny)+" (náhradní termín "+czDate(fotky.fotkyNahradni)+"). Jinak spoluúčast 90 %, po náhradním termínu zaniká havárie a výmol."+(fotky.fotkyPozn?" "+fotky.fotkyPozn:"")});
 events.push({flat:AUTO.id, cat:"auto", date:AUTO.znamka.do,
   title:"Konec dálniční známky – auto (VW Sharan)",
   desc:"Roční elektronická známka platí do "+czDate(AUTO.znamka.do)+" 23:59. Novou kup předem na edalnice.gov.cz, počátek platnosti si zvolíš."});
@@ -251,7 +276,8 @@ const UKOL_NAZVY = [
   ["Pojištění bytu", "zaplatit pojistné za byt"],
   ["Pojištění nemovitosti", "zaplatit pojistné za nemovitost"],
   ["Pojištění domu a domácnosti", "zaplatit pojistné za dům a domácnost"],
-  ["Pojištění auta", "zaplatit pojistné za auto (nová smlouva)"],
+  ["Pojištění auta – začátek nové smlouvy", "zaplatit pojistné za auto (nová smlouva)"],
+  ["Pojištění auta", "zaplatit pojistné za auto"],
   ["Řešit další dodávku energií", "řešit další dodávku energií"],
   ["Konec doby určité", "konec pevné ceny energií"],
   ["Očekávané roční vyúčtování vody", "roční vyúčtování vody"],
@@ -921,23 +947,31 @@ function renderAuto(){
       </div>
       ${linkRow([a.znamka.odkaz])}
     </div>
-    <div class="block blk-pojisteni"><div class="btitle">Pojištění – stávající smlouva (${a.pojisteni.pojistovna} ${a.pojisteni.produkt})</div>
+    ${(()=>{ const p=a.pojisteni, nova=!a.navrh;
+      return `<div class="block blk-pojisteni"><div class="btitle">Pojištění – ${nova?"platná":"stávající"} smlouva (${p.pojistovna} ${p.produkt})</div>
       <div class="rows">
-        <div class="row"><span>Celkem</span><span class="big">${kc(a.pojisteni.rocne)} / rok</span></div>
-        ${row("Splátka", `${kc(a.pojisteni.splatka)} čtvrtletně`)}
-        ${row("Smlouva č.", a.pojisteni.cislo)}
-        ${row("Platnost", `od ${czDate(a.pojisteni.od)}<br>na dobu neurčitou`)}
-        <div class="row"><span>Výročí</span><span>${a.pojisteni.vyrociDen}. ${a.pojisteni.vyrociMesic}.
-          <span class="badge b-${tone(dayDiff(dalsiVyroci(a.pojisteni.vyrociDen,a.pojisteni.vyrociMesic)))}">${relText(dayDiff(dalsiVyroci(a.pojisteni.vyrociDen,a.pojisteni.vyrociMesic)))}</span></span></div>
-        ${row("Pojistník", a.pojisteni.pojistnik)}
+        <div class="row"><span>Celkem</span><span class="big">${kc(p.rocne)} / rok</span></div>
+        ${p.rocneBezSlevy ? row("Před slevou", kc(p.rocneBezSlevy)) : ""}
+        ${row("Platba", `${kc(p.splatka)} ${obdobiText(p.platbaMesicu||p.obdobiMesicu)}${nova ? (()=>{ const d=dalsiPlatbaAuta(p), s=d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+          return `<br>další ${czDate(s)} <span class="badge b-${tone(dayDiff(s))}">${relText(dayDiff(s))}</span>`; })() : ""}`)}
+        ${p.platbaMesicu && p.platbaMesicu!==p.obdobiMesicu ? row("Pojistné období", `${p.obdobiMesicu} měsíců`) : ""}
+        ${row("Smlouva č.", p.cislo)}
+        ${row("Platnost", `od ${czDate(p.od)}<br>na dobu neurčitou${dayDiff(p.od)>0 ? ` <span class="badge b-${tone(dayDiff(p.od))}">${relText(dayDiff(p.od))}</span>` : ""}`)}
+        ${p.podepsano ? row("Podepsáno", p.podepsano) : ""}
+        <div class="row"><span>Výročí</span><span>${p.vyrociDen}. ${p.vyrociMesic}.
+          <span class="badge b-${tone(dayDiff(dalsiVyroci(p.vyrociDen,p.vyrociMesic)))}">${relText(dayDiff(dalsiVyroci(p.vyrociDen,p.vyrociMesic)))}</span></span></div>
+        ${nova && p.fotkyRadny ? `<div class="row"><span>Fotky auta do</span><span>${czDate(p.fotkyRadny)}
+          <span class="badge b-${tone(dayDiff(p.fotkyRadny))}">${relText(dayDiff(p.fotkyRadny))}</span><br>
+          <span style="color:var(--muted);font-size:12px">náhradní termín ${czDate(p.fotkyNahradni)}${p.fotkyPozn?" · "+p.fotkyPozn:""}</span></span></div>` : ""}
+        ${row("Pojistník", p.pojistnik)}
       </div>
       <div style="border-top:1px solid var(--line);margin:10px 0"></div>
       <div class="rows">
-        ${a.pojisteni.slozky.map(([n,c,pz])=>`<div class="row"><span>${n}</span><span>${c?kc(c)+" / rok":"v ceně"}<br><span style="color:var(--muted);font-size:12px">${pz}</span></span></div>`).join("")}
-        <div class="row"><span></span><span style="color:var(--muted);font-size:12px">Částky podle smlouvy z 22. 11. 2019 – bude nahrazena novou smlouvou.</span></div>
+        ${p.slozky.map(([n,c,pz])=>`<div class="row"><span>${n}</span><span>${c?kc(c)+" / rok":"v ceně"}<br><span style="color:var(--muted);font-size:12px">${pz}</span></span></div>`).join("")}
+        <div class="row"><span></span><span style="color:var(--muted);font-size:12px">${nova ? (p.poznamka||"") : "Částky podle smlouvy z "+czDate(p.od)+" – bude nahrazena novou smlouvou."}</span></div>
       </div>
-    </div>
-    <div class="block blk-pojisteni"><div class="btitle">Pojištění – návrh nové smlouvy (modelace ${czDate(a.navrh.vytvoreno)})</div>
+    </div>`; })()}
+    ${a.navrh ? `<div class="block blk-pojisteni"><div class="btitle">Pojištění – návrh nové smlouvy (modelace ${czDate(a.navrh.vytvoreno)})</div>
       <div class="rows">
         <div class="row"><span>Celkem</span><span class="big">${kc(a.navrh.rocne)} / rok</span></div>
         ${row("Před slevou", kc(a.navrh.rocneBezSlevy))}
@@ -954,7 +988,16 @@ function renderAuto(){
         ${a.navrh.slozky.map(([n,c,pz])=>`<div class="row"><span>${n}</span><span>${c?kc(c)+" / rok":"v ceně"}<br><span style="color:var(--muted);font-size:12px">${pz}</span></span></div>`).join("")}
         <div class="row"><span></span><span style="color:var(--muted);font-size:12px">${a.navrh.poznamka}</span></div>
       </div>
-    </div>
+    </div>` : ""}
+    ${a.pojisteniPuvodni ? (()=>{ const o=a.pojisteniPuvodni;
+      return `<div class="block blk-pojisteni"><div class="btitle">Pojištění – původní smlouva (archiv)</div>
+      <div class="rows">
+        ${row("Smlouva č.", `${o.cislo} · ${o.pojistovna} ${o.produkt}`)}
+        ${row("Platnost", `${czDate(o.od)} – nahrazena ${czDate(o.nahrazeno)}`)}
+        ${row("Pojistné", `${kc(o.rocne)} / rok (${kc(o.splatka)} ${obdobiText(o.obdobiMesicu)})`)}
+        ${row("Pojistník", o.pojistnik)}
+      </div>
+    </div>`; })() : ""}
     <div class="block blk-dok"><div class="btitle">Vozidlo</div>
       <div class="rows">
         ${row("Vůz", v.znacka)}
@@ -1000,14 +1043,11 @@ function renderPlatby(){
     if(dayDiff(n.zacatek)>=0 && n.zacatek<=KONEC_OKNA)
       rows.push({den:0, kdy:czDate(n.zacatek), co:"Pojištění auta – nová smlouva (rok)", kde:"Auto · Kooperativa · částka z návrhu, splatnost ověřit", kc:n.rocne, pribl:true, zp:null, jednou:true});
   } else if(AUTO.pojisteni){
-    const p=AUTO.pojisteni;
-    let d=new Date(dalsiVyroci(p.vyrociDen,p.vyrociMesic)+"T00:00:00");
-    while(d > TODAY) d.setMonth(d.getMonth()-p.obdobiMesicu);
-    d.setMonth(d.getMonth()+p.obdobiMesicu);
-    for(; ; d.setMonth(d.getMonth()+p.obdobiMesicu)){
+    const p=AUTO.pojisteni, m=p.platbaMesicu||p.obdobiMesicu;
+    for(let d=dalsiPlatbaAuta(p); ; d.setMonth(d.getMonth()+m)){
       const s=d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
       if(s>KONEC_OKNA) break;
-      rows.push({den:0, kdy:czDate(s), co:"Pojištění auta (čtvrtletně)", kde:"Auto · Kooperativa · částka ze smlouvy 2019", kc:p.splatka, pribl:true, zp:null, jednou:true});
+      rows.push({den:0, kdy:czDate(s), co:"Pojištění auta ("+obdobiText(m)+")", kde:"Auto · "+p.pojistovna+" · částka ze smlouvy z "+czDate(p.od), kc:p.splatka, pribl:true, zp:null, jednou:true});
     }
   }
   rows.sort((a,b)=> (a.jednou?0:1)-(b.jednou?0:1) || a.den-b.den);
