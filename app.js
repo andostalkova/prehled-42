@@ -12,6 +12,7 @@ const czDate = s => { const d=new Date(s+"T00:00:00");
 const dayDiff = s => Math.round((new Date(s+"T00:00:00") - TODAY)/DAY);
 const kc = n => n.toLocaleString("cs-CZ")+" Kč";
 const kcH = n => n.toLocaleString("cs-CZ",{minimumFractionDigits:Number.isInteger(n)?0:2, maximumFractionDigits:2})+" Kč";   // s haléři, když jsou
+const htmlEscape = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const pad = n => String(n).padStart(2,"0");
 const minusMonths = (s,m) => { const d=new Date(s+"T00:00:00"); d.setMonth(d.getMonth()-m);
   return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); };
@@ -601,6 +602,7 @@ function renderCards(){
           <div class="row minor"><span>platné od</span><span>${czDate(b.zalohyOd)}</span></div>
           ${b.predpisCelkem && b.predpisCelkem!==b.zalohy?`<div class="row minor"><span>nájemník platí</span><span>${kc(b.zalohy)}, zbytek vlastník</span></div>`:""}
           <div class="row minor"><span>zdroj</span><span>${b.fondOprav!=null?"smlouva, evidenční / výpočtový list správce":"smlouva, nové vyúčtování"}</span></div>
+          ${b.zalohyPlati?`<div class="row minor"><span>Platbu správci posílá</span><span>${htmlEscape(b.zalohyPlati)}</span></div>`:""}
           <div class="row minor"><span>Platit na účet SVJ / VS</span><span>${b.ucet}<br>${b.vs}</span></div>
         </div>
       </div>`;
@@ -1025,7 +1027,7 @@ function renderPlatby(){
   const rows=[];
   BYTY.forEach(b=>{
     if(b.stav==="pronajato" && (b.predpisCelkem||b.zalohy))
-      rows.push({den:99, kdy:"měsíčně", co:"Zálohy správci", kde:`${b.kratky} · ${b.spravce||"správce"}`, kc:b.predpisCelkem||b.zalohy, zp:b.zalohyZpusob||null});
+      rows.push({den:99, kdy:"měsíčně", co:"Zálohy správci", kde:`${b.kratky} · ${b.spravce||"správce"}`, kc:b.predpisCelkem||b.zalohy, zp:b.zalohyZpusob||null, automaticka:!!b.zalohyAutomaticka});
     if(b.energie){
       const e=b.energie;
       rows.push({den:98, kdy:"měsíčně", co:"Elektřina – vyúčtování", kde:`${b.kratky} · PRE · podle spotřeby`, kc:e.elektrina.castka, pribl:true, zp:"csob"});
@@ -1052,9 +1054,10 @@ function renderPlatby(){
   }
   rows.sort((a,b)=> (a.jednou?0:1)-(b.jednou?0:1) || a.den-b.den);
   const ZP = { csob:'<span class="zp zp-ink">trvalý příkaz z ČSOB</span>', marekkb:'<span class="zp zp-ink">Marek KB</span>',
-               ansporka:'<span class="zp zp-ink">An – Spořka</span>', prevod:'<span class="zp zp-prev">převod</span>' };
-  // platby s trvalým příkazem z ČSOB se v seznamu neukazují (platí se samy), do souhrnu níže se ale počítají
-  const videt = rows.filter(r=>r.zp!=="csob");
+               ansporka:'<span class="zp zp-ink">An – Spořka</span>', prevod:'<span class="zp zp-prev">převod</span>',
+               "trvaly-prikaz":'<span class="zp zp-ink">trvalý příkaz</span>' };
+  // Automatické platby se v seznamu neukazují, do souhrnu níže se ale počítají.
+  const videt = rows.filter(r=>r.zp!=="csob" && !r.automaticka);
   const tr = videt.map(r=>`<tr>
       <td style="white-space:nowrap">${r.kdy}</td>
       <td>${r.co}<span class="kde">${r.kde}</span></td>
@@ -1066,7 +1069,7 @@ function renderPlatby(){
     ? `<table class="pt"><thead><tr>
       <th>Kdy</th><th>Co</th><th class="num">Kolik</th><th>Jak</th></tr></thead><tbody>${tr}</tbody></table>`
     : `<div class="empty">Žádná platba k ručnímu zaplacení.</div>`) + `
-    <div class="pt-sum">Měsíčně celkem <b>${kc(sum(()=>true))}</b>, z toho trvalým příkazem z ČSOB ${kc(sum(r=>r.zp==="csob"))} (v seznamu nejsou).
+    <div class="pt-sum">Měsíčně celkem <b>${kc(sum(()=>true))}</b>, z toho automaticky ${kc(sum(r=>r.zp==="csob" || r.automaticka))} (v seznamu nejsou).
       Do ${czDate(KONEC_OKNA)} ${rows.some(r=>r.jednou)?"je navíc výše jednorázová platba.":"nepřipadá žádné roční pojistné."}</div>`;
 }
 
