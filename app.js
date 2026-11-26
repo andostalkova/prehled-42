@@ -709,7 +709,7 @@ function renderCards(){
           <div class="row"><span>Měsíční plat</span><span>${kc(el.mesicniPlat)}</span></div>
           <div class="row"><span>Elektroměr č.</span><span>${el.elektromer}</span></div>
           <div class="row"><span>Poslední odečet</span><span>${czDate(el.odecet)} · ${el.stav}</span></div>
-          <div class="row minor"><span>Poslední vyúčtování</span><span>${czDate(el.vyuctovani)} · ${kc(el.castka)}<br>za ${el.vyuctovaniZa}</span></div>
+          <div class="row"><span>Poslední vyúčtování</span><span>${czDate(el.vyuctovani)} · ${kc(el.castka)}<br>za ${el.vyuctovaniZa}</span></div>
           <div class="row"><span></span><span style="color:var(--muted);font-size:12px">${el.pozn}</span></div>
         </div>${hr}
         <div class="btitle btitle-komodita">Plyn</div>
@@ -723,7 +723,7 @@ function renderCards(){
           <div class="row"><span>Předpokládaná spotřeba</span><span>${pl.rocniSpotreba}</span></div>
           <div class="row"><span>Cena plynu</span><span>${kc(pl.cenaMWh)} / MWh<br>+ ${kc(pl.mesicniPlat)} měsíčně</span></div>
           <div class="row"><span>Poslední odečet</span><span>${czDate(pl.odecet)} · ${pl.stav}</span></div>
-          <div class="row minor"><span>Poslední vyúčtování</span><span>${czDate(pl.vyuctovani)} · ${kc(pl.castka)}<br>za ${pl.vyuctovaniZa}</span></div>
+          <div class="row"><span>Poslední vyúčtování</span><span>${czDate(pl.vyuctovani)} · ${kc(pl.castka)}<br>za ${pl.vyuctovaniZa}</span></div>
           <div class="row"><span>Záloha</span><span class="big">${kc(pl.zaloha)} měsíčně</span></div>
           <div class="row"><span>Další splatná</span><span>${czDate(dalsiDenVMesici(pl.splatnostDen))}
             <span class="badge b-amber">${relText(dayDiff(dalsiDenVMesici(pl.splatnostDen)))}</span></span></div>
