@@ -288,6 +288,13 @@ footer code{background:var(--grey-soft);padding:1px 5px;border-radius:4px;font-s
 .login .err{color:var(--red);font-size:13.5px;margin-top:14px;min-height:1.2em}
 .logout{margin-left:auto}
 [hidden]{display:none!important}
+
+/* jednotná velikost písma: všechno kromě nadpisů (h1–h3, názvy bloků, záhlaví tabulek a filtrů) má 13 px.
+   Důležité údaje se odlišují tloušťkou písma, ne velikostí. !important přebíjí i styly zapsané přímo v app.js. */
+.row,.row span,.big,.block .row.key > span:first-child,.block .row.key > span:last-child,.block .row.minor,.block .row.minor > span,
+.badge,.block .row.key .badge,.block .row.minor .badge,.ev-date,.ev-in,.ev-title,.ev-desc,.ev-flat,.pt,.pt td,.pt .kde,.zp,.pt-sum,
+.ph,.ph td,.ph-note,.ph td.ph-src,.addr,.sub,.count,.chip,.linkbtn,.collapsebtn,.links a,.nolink,.warnbox,.warnbox li,.note,.empty,footer,footer code,
+.card [style*="font-size"],.ev [style*="font-size"],.platby [style*="font-size"],.ph [style*="font-size"]{font-size:13px!important}
 </style>
 </head>
 <body>
