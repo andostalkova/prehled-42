@@ -614,7 +614,7 @@ function renderCards(){
           <div class="row"><span>Nedoplatek splatný</span><span>${b.splatnost}</span></div>
           ${b.vyuctovaniHistorie?(()=>{const h=b.vyuctovaniHistorie, p=h[0]; const txt=([r,v,s])=>`${r}: ${v<0?"přeplatek":"nedoplatek"} ${kc(Math.abs(v))}`;
             return `<div class="row"><span>Poslední (${p[0]})</span><span class="big">${p[1]<0?"přeplatek":"nedoplatek"} ${kc(Math.abs(p[1]))}<br><span style="font-weight:400;font-size:12px;color:var(--muted)">${p[2]}</span></span></div>
-          <div class="row"><span>Dřívější roky</span><span style="font-size:12.5px">${h.slice(1).map(txt).join("<br>")}</span></div>`;})():""}
+          <div class="row"><span>Dřívější roky</span><span>${h.slice(1).map(txt).join("<br>")}</span></div>`;})():""}
         </div>
       </div>`;
     } else if(b.stav==="pred-prevzetim"){
@@ -703,13 +703,13 @@ function renderCards(){
           <div class="row"><span>Produkt</span><span class="big">${el.produkt}</span></div>
           <div class="row"><span>Smlouva č.</span><span>${el.smlouva}</span></div>
           <div class="row"><span>Platnost</span><span>${czDate(el.platnostOd)} – ${czDate(el.platnostDo)}
-            <span class="badge b-green">${relText(dayDiff(el.platnostDo))}</span><br>doba určitá, pak neurčitá</span></div>
+            <span class="badge b-green">${relText(dayDiff(el.platnostDo))}</span><br><span style="font-weight:400;font-size:12px;color:var(--muted)">doba určitá, pak neurčitá</span></span></div>
           <div class="row"><span>Zákaznický účet</span><span>${el.ucet}</span></div>
           <div class="row"><span>Sazba a jistič</span><span>${el.sazba} · ${el.jistic}</span></div>
           <div class="row"><span>Měsíční plat</span><span>${kc(el.mesicniPlat)}</span></div>
           <div class="row"><span>Elektroměr č.</span><span>${el.elektromer}</span></div>
           <div class="row"><span>Poslední odečet</span><span>${czDate(el.odecet)} · ${el.stav}</span></div>
-          <div class="row"><span>Poslední vyúčtování</span><span>${czDate(el.vyuctovani)} · ${kc(el.castka)}<br>za ${el.vyuctovaniZa}</span></div>
+          <div class="row"><span>Poslední vyúčtování</span><span>${czDate(el.vyuctovani)} · ${kc(el.castka)}<br><span style="font-weight:400;font-size:12px;color:var(--muted)">za ${el.vyuctovaniZa}</span></span></div>
           <div class="row"><span></span><span style="color:var(--muted);font-size:12px">${el.pozn}</span></div>
         </div>${hr}
         <div class="btitle btitle-komodita">Plyn</div>
@@ -717,13 +717,13 @@ function renderCards(){
           <div class="row"><span>Produkt</span><span class="big">${pl.produkt}</span></div>
           <div class="row"><span>Smlouva č.</span><span>${pl.smlouva}</span></div>
           <div class="row"><span>Platnost</span><span>${czDate(pl.platnostOd)} – ${czDate(pl.platnostDo)}
-            <span class="badge b-green">${relText(dayDiff(pl.platnostDo))}</span><br>doba určitá, pak neurčitá</span></div>
+            <span class="badge b-green">${relText(dayDiff(pl.platnostDo))}</span><br><span style="font-weight:400;font-size:12px;color:var(--muted)">doba určitá, pak neurčitá</span></span></div>
           <div class="row"><span>Zákaznický účet</span><span>${pl.ucet}</span></div>
           <div class="row"><span>Odběr / plynoměr č.</span><span>${pl.odber} · ${pl.plynomer}</span></div>
           <div class="row"><span>Předpokládaná spotřeba</span><span>${pl.rocniSpotreba}</span></div>
           <div class="row"><span>Cena plynu</span><span>${kc(pl.cenaMWh)} / MWh<br>+ ${kc(pl.mesicniPlat)} měsíčně</span></div>
           <div class="row"><span>Poslední odečet</span><span>${czDate(pl.odecet)} · ${pl.stav}</span></div>
-          <div class="row"><span>Poslední vyúčtování</span><span>${czDate(pl.vyuctovani)} · ${kc(pl.castka)}<br>za ${pl.vyuctovaniZa}</span></div>
+          <div class="row"><span>Poslední vyúčtování</span><span>${czDate(pl.vyuctovani)} · ${kc(pl.castka)}<br><span style="font-weight:400;font-size:12px;color:var(--muted)">za ${pl.vyuctovaniZa}</span></span></div>
           <div class="row"><span>Záloha</span><span class="big">${kc(pl.zaloha)} měsíčně</span></div>
           <div class="row"><span>Další splatná</span><span>${czDate(dalsiDenVMesici(pl.splatnostDen))}
             <span class="badge b-amber">${relText(dayDiff(dalsiDenVMesici(pl.splatnostDen)))}</span></span></div>

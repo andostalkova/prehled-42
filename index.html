@@ -6,48 +6,43 @@
 <title>Přehled 42</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Přehled 42">
-<meta name="theme-color" content="#2f5fd0">
+<meta name="theme-color" content="#4a5568">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏠</text></svg>">
 <style>
 :root{
-  --bg:#f6f7f9; --card:#ffffff; --ink:#16181d; --ink-soft:#3f4756; --muted:#6b7280; --line:#e4e7ec;
-  --accent:#2f5fd0; --accent-soft:#eaf0fd;
-  --red:#c0392b; --red-soft:#fdecea;
-  --amber:#a76b00; --amber-soft:#fdf3e0;
-  --green:#1f7a4d; --green-soft:#e8f6ee;
-  --grey-soft:#f0f1f4;
-  --panel:#f7f8fa;
+  --bg:#f5f5f4; --card:#ffffff; --ink:#202226; --ink-soft:#454a53; --muted:#6b707a; --line:#e8e8e6;
+  --accent:#4a5568; --accent-soft:#eeeff1;
+  --red:#a9473d; --red-soft:#f5e9e7;
+  --amber:#8f6417; --amber-soft:#f6f1e7;
+  --green:#3c7556; --green-soft:#eaf1ed;
+  --grey-soft:#efefed;
+  --panel:#f7f7f6;
   --radius:12px;
-  /* barvy kategorií – schválně jiné než červená/oranžová/zelená naléhavosti;
-     ztmavené, aby drobné verzálky měly dost kontrastu */
-  --c-smlouva:#4338ca;   /* indigová  */
-  --c-zalohy:#0f766e;    /* petrolejová */
-  --c-vyuct:#7e22ce;     /* fialová */
-  --c-pojisteni:#9d174d; /* malinová */
-  --c-hypo:#075985;      /* modrá */
-  --c-energie:#475569;   /* břidlicová */
-  /* barvy bytů */
-  --b-trigema:#4338ca; --b-kacirkova:#0f766e;
-  --b-kobranova:#7e22ce; --b-luziny:#b45309; --b-botanika:#0e7490; --b-auto:#be123c;
+  /* neutrální vzhled: kategorie i byty jsou šedé, barvu nesou jen stavy (červená/žlutá/zelená) */
+  --c-smlouva:#6b707a; --c-zalohy:#6b707a; --c-vyuct:#6b707a;
+  --c-pojisteni:#6b707a; --c-hypo:#6b707a; --c-energie:#6b707a;
+  --b-trigema:#c9cbd0; --b-kacirkova:#c9cbd0;
+  --b-kobranova:#c9cbd0; --b-luziny:#c9cbd0; --b-botanika:#c9cbd0; --b-auto:#c9cbd0;
 }
 @media (prefers-color-scheme: dark){
   :root{
-    --bg:#14161a; --card:#1c1f25; --ink:#e8eaee; --ink-soft:#c3c8d2; --muted:#9aa1ad; --line:#2c313a;
-    --accent:#7ba3f5; --accent-soft:#1e2739;
-    --red:#f08a7e; --red-soft:#33211f;
-    --amber:#e0b263; --amber-soft:#302818;
-    --green:#7fd0a3; --green-soft:#1a2b22;
-    --grey-soft:#24272e; --panel:#23272f;
-    --c-smlouva:#a5a0f8; --c-zalohy:#5eccc0;
-    --c-vyuct:#c79bf0; --c-pojisteni:#f090b6; --c-hypo:#7cc0ea; --c-energie:#a9b8cc;
-    --b-trigema:#a5a0f8; --b-kacirkova:#5eccc0;
-    --b-kobranova:#c79bf0; --b-luziny:#e0a45c; --b-botanika:#67d4e8; --b-auto:#f4a3b5;
+    --bg:#161718; --card:#1e1f21; --ink:#e8e9eb; --ink-soft:#c5c8ce; --muted:#9a9ea7; --line:#2d2f33;
+    --accent:#9aa5b8; --accent-soft:#272a2f;
+    --red:#e08b80; --red-soft:#33231f;
+    --amber:#d9b169; --amber-soft:#2e2819;
+    --green:#7fc29c; --green-soft:#1c2a22;
+    --grey-soft:#26282b; --panel:#232528;
+    --c-smlouva:#9a9ea7; --c-zalohy:#9a9ea7; --c-vyuct:#9a9ea7;
+    --c-pojisteni:#9a9ea7; --c-hypo:#9a9ea7; --c-energie:#9a9ea7;
+    --b-trigema:#4a4e55; --b-kacirkova:#4a4e55;
+    --b-kobranova:#4a4e55; --b-luziny:#4a4e55; --b-botanika:#4a4e55; --b-auto:#4a4e55;
   }
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);
   font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;}
 .wrap{max-width:1400px;margin:0 auto;padding:28px 20px 80px}
+a{color:var(--accent)}
 
 header{margin-bottom:22px;display:flex;align-items:baseline;flex-wrap:wrap;column-gap:16px;row-gap:4px}
 h1{font-size:26px;margin:0;letter-spacing:-.02em}
@@ -244,7 +239,7 @@ h2{font-size:14px;text-transform:uppercase;letter-spacing:.07em;color:var(--mute
 .bar.warn i{background:var(--amber)} .bar.crit i{background:var(--red)}
 
 .links{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
-.links a{font-size:12.5px;text-decoration:none;color:var(--accent);background:var(--accent-soft);
+.links a{font-size:12.5px;text-decoration:none;color:var(--ink-soft);background:var(--grey-soft);
   border:1px solid transparent;padding:5px 10px;border-radius:7px;
   max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .links a:hover{border-color:var(--accent)}
@@ -408,7 +403,7 @@ async function spustApp(){
   if (!appLoaded) {
     appLoaded = true;
     const s = document.createElement('script');
-    s.src = 'app.js?v=25';
+    s.src = 'app.js?v=26';
     s.onerror = () => { appLoaded = false; ukazPrihlaseni('Nepodařilo se načíst aplikaci.'); };
     document.body.appendChild(s);
   }
