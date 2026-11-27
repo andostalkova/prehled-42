@@ -111,7 +111,7 @@ function elektrinaTabulka(roky, dph){
     <div class="ph-scroll"><table class="ph ph-zar"><thead><tr>
       <th>Rok</th><th>Produkt</th><th>Cena elektřiny Kč/kWh</th><th>Stálý plat / měs.</th><th>Spotřeba</th><th>Kč za 1 kWh celkem</th><th>Zálohy</th><th>Přeplatek / nedoplatek</th><th>Zaplaceno celkem</th>
     </tr></thead><tbody>${tr}</tbody></table></div>
-    <div class="ph-note">Když se v roce změnila cena nebo produkt, je uvedeno „původní → nové“. „Cena elektřiny“ je samotná komodita (u FOSFA a GAS INT z faktur nevyplývá), „Kč za 1 kWh celkem“ je elektřina a regulované služby s DPH, před slevami, děleno spotřebou.
+    <div class="ph-note">Když se v roce změnila cena nebo produkt, je uvedeno „původní → nové“. „Cena elektřiny“ je samotná komodita, „Kč za 1 kWh celkem“ je elektřina a regulované služby s DPH, před slevami, děleno spotřebou. Ceny FOSFA jsou dopočtené z rozpisu faktur (od 6/2019), ceny GAS INT jsou přímo z faktur.
       „Zaplaceno celkem“ je vyúčtovaná spotřeba z měsíčních faktur po slevách. Spotřeba a platby jsou z faktur FOSFA (od 11/2018 do 4/2021), GAS INT (od 5/2021 do 10/2022) a PRE (od 10/2022 do 10/2026).
       FOSFA a GAS INT vyúčtovávaly měsíčně proti zálohám; PRE nemá zálohy a platí se měsíční faktura inkasem.
       ${roky.filter(r=>r.vysledekPozn).map(r=>`<br>Rok ${r.rok}: ${r.vysledekPozn}`).join("")}</div>`;
