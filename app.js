@@ -75,7 +75,7 @@ function vyvojTabulka(nazev, radky, dph){
     const doplnek = !rozsireno ? `<td class="ph-src">${r.zdroj}</td>` : `
       <td style="white-space:nowrap">${maFaktury?`${r.kwh.toLocaleString("cs-CZ")} kWh`:""}</td>
       <td style="white-space:nowrap">${maFaktury?(r.vyuct/r.kwh).toLocaleString("cs-CZ",{minimumFractionDigits:2,maximumFractionDigits:2}):""}</td>
-      <td>${maFaktury?`<span class="ph-src">žádné, měsíční faktury</span>`:""}</td>
+      <td>${maFaktury?"nejsou":""}</td>
       <td>${maFaktury?`měsíčně dorovnáno inkasem (${r.faktur} ${r.faktur<5?"faktury":"faktur"})${r.vysledekPozn?`<br><span class="ph-src">${r.vysledekPozn}</span>`:""}`:""}</td>
       <td class="ph-cena">${maFaktury?`<div class="ph-barwrap"><i style="width:${(r.zaplaceno/maxZapl*100).toFixed(0)}%"></i></div><b>${kcH(r.zaplaceno)}</b>`:""}</td>`;
     return `<tr${posledni?' class="ph-now"':''}>
