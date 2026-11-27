@@ -64,35 +64,50 @@ const cenaKwh = n => (n/1000).toLocaleString("cs-CZ",{minimumFractionDigits:2,ma
 const cenaKwhDph = mwhDph => (mwhDph/1000).toLocaleString("cs-CZ",{minimumFractionDigits:2,maximumFractionDigits:2});
 function vyvojTabulka(nazev, radky, dph){
   const max = Math.max(...radky.map(r=>r.mwh));
-  const rozsireno = radky.some(r=>r.zaplaceno!=null);
-  const maxZapl = rozsireno ? Math.max(...radky.filter(r=>r.zaplaceno!=null).map(r=>r.zaplaceno)) : 0;
   const tr = radky.map((r,i)=>{
     const zm = i ? Math.round((r.mwh/radky[i-1].mwh-1)*100) : null;
     const zmHtml = zm===null ? "" :
       `<span style="color:var(--${zm>0?'red':zm<0?'green':'muted'})">${zm>0?"+":""}${zm} %</span>`;
     const posledni = i===radky.length-1;
-    const rok = rozsireno ? +(String(r.obdobi).match(/\d{4}/)||[0])[0] : 0;
-    const tridaRoku = rok ? ` rok-${rok%2 ? "b" : "a"}` : "";
-    const maFaktury = r.zaplaceno!=null;
-    const doplnek = !rozsireno ? `<td class="ph-src">${r.zdroj}</td>` : `
-      <td style="white-space:nowrap">${maFaktury?`${r.kwh.toLocaleString("cs-CZ")} kWh`:""}</td>
-      <td style="white-space:nowrap">${maFaktury?(r.vyuct/r.kwh).toLocaleString("cs-CZ",{minimumFractionDigits:2,maximumFractionDigits:2}):""}</td>
-      <td>${maFaktury?"nejsou":""}</td>
-      <td>${maFaktury?`měsíčně dorovnáno inkasem (${r.faktur} ${r.faktur<5?"faktury":"faktur"})${r.vysledekPozn?`<br><span class="ph-src">${r.vysledekPozn}</span>`:""}`:""}</td>
-      <td class="ph-cena">${maFaktury?`<div class="ph-barwrap"><i style="width:${(r.zaplaceno/maxZapl*100).toFixed(0)}%"></i></div><b>${kcH(r.zaplaceno)}</b>`:""}</td>`;
-    return `<tr class="${posledni?"ph-now":""}${tridaRoku}">
+    return `<tr${posledni?' class="ph-now"':''}>
       <td>${r.obdobi}</td><td>${r.produkt}</td>
       <td class="ph-cena"><div class="ph-barwrap"><i style="width:${(r.mwh/max*100).toFixed(0)}%"></i></div><b>${cenaKwhDph(r.mwh*dph)}</b></td>
       <td style="white-space:nowrap">${zmHtml}</td>
       <td>${r.plat.toLocaleString("cs-CZ",{minimumFractionDigits:r.plat%1?2:0})} Kč</td>
-      ${doplnek}</tr>`;
+      <td class="ph-src">${r.zdroj}</td></tr>`;
   }).join("");
-  const hlavicka = rozsireno
-    ? "<th>Období</th><th>Produkt</th><th>Kč/kWh s DPH</th><th>Změna</th><th>Stálý plat / měs.</th><th>Spotřeba</th><th>Kč za 1 kWh celkem</th><th>Zálohy</th><th>Přeplatek / nedoplatek</th><th>Zaplaceno celkem</th>"
-    : "<th>Období</th><th>Produkt</th><th>Kč/kWh s DPH</th><th>Změna</th><th>Stálý plat / měs.</th><th>Zdroj</th>";
-  const poznamka = !rozsireno ? "" : `<div class="ph-note">Elektřina se vyúčtovává každý měsíc zpětně a platí se inkasem, proto nejsou zálohy ani roční vyúčtování. „Zaplaceno celkem“ je součet částek k úhradě z měsíčních faktur s DPH, po slevách. „Kč za 1 kWh celkem“ je elektřina a regulované služby s DPH, před slevami, děleno spotřebou.</div>`;
   return `<div class="btitle btitle-komodita">${nazev}</div>
-    <div class="ph-scroll"><table class="ph"><thead><tr>${hlavicka}</tr></thead><tbody>${tr}</tbody></table></div>${poznamka}`;
+    <div class="ph-scroll"><table class="ph"><thead><tr>
+      <th>Období</th><th>Produkt</th><th>Kč/kWh s DPH</th><th>Změna</th><th>Stálý plat / měs.</th><th>Zdroj</th>
+    </tr></thead><tbody>${tr}</tbody></table></div>`;
+}
+/* Elektřina: řádek = kalendářní rok, součty z měsíčních faktur PRE (s DPH). Elektřina se vyúčtovává každý měsíc
+   zpětně a platí se inkasem, proto nejsou zálohy. Ceny jsou v Kč/MWh bez DPH, zobrazují se jako Kč/kWh s DPH.
+   Šedě jsou celé kalendářní roky, rok s neúplnými daty (první a poslední) zůstává bez barvy. */
+function elektrinaTabulka(roky, dph){
+  const max = Math.max(...roky.map(r=>r.zaplaceno));
+  const bezOpakovani = a => a.filter((x,i)=>i===0||x!==a[i-1]);
+  const cenaTxt = a => bezOpakovani(a).map(x=>cenaKwhDph(x*dph)).join(" → ");
+  const platTxt = a => bezOpakovani(a).map(x=>x.toLocaleString("cs-CZ")).join(" → ")+" Kč";
+  const tr = roky.map((r,i)=>{
+    const cely = !r.pozn;
+    return `<tr class="${i===roky.length-1?"ph-now":""}${cely?" rok-b":""}">
+      <td style="white-space:nowrap">${r.rok}${r.pozn?`<br><span class="ph-src">${r.pozn}</span>`:""}</td>
+      <td>${r.produkty.join(" → ")}</td>
+      <td style="white-space:nowrap">${cenaTxt(r.mwh)}</td>
+      <td style="white-space:nowrap">${platTxt(r.platy)}</td>
+      <td style="white-space:nowrap">${r.kwh.toLocaleString("cs-CZ")} kWh</td>
+      <td style="white-space:nowrap">${(r.vyuct/r.kwh).toLocaleString("cs-CZ",{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+      <td>nejsou</td>
+      <td>měsíčně dorovnáno inkasem (${r.faktur} ${r.faktur<5?"faktury":"faktur"})${r.vysledekPozn?`<br><span class="ph-src">${r.vysledekPozn}</span>`:""}</td>
+      <td class="ph-cena"><div class="ph-barwrap"><i style="width:${(r.zaplaceno/max*100).toFixed(0)}%"></i></div><b>${kcH(r.zaplaceno)}</b></td></tr>`;
+  }).join("");
+  return `<div class="btitle btitle-komodita">Elektřina (sazba D02d, vysoký tarif) – ceny a zaplaceno po kalendářních letech (s DPH)</div>
+    <div class="ph-scroll"><table class="ph"><thead><tr>
+      <th>Rok</th><th>Produkt</th><th>Cena elektřiny Kč/kWh</th><th>Stálý plat / měs.</th><th>Spotřeba</th><th>Kč za 1 kWh celkem</th><th>Zálohy</th><th>Přeplatek / nedoplatek</th><th>Zaplaceno celkem</th>
+    </tr></thead><tbody>${tr}</tbody></table></div>
+    <div class="ph-note">Když se v roce změnila cena nebo produkt, je uvedeno „původní → nové“. „Cena elektřiny“ je samotná komodita, „Kč za 1 kWh celkem“ je elektřina a regulované služby s DPH, před slevami, děleno spotřebou.
+      „Zaplaceno celkem“ je součet částek k úhradě z měsíčních faktur po slevách. Spotřeba a platby jsou za měsíce s fakturami PRE, tedy od 10/2022 do 10/2026.</div>`;
 }
 /* Plyn: jedna tabulka – cena plynu z ceníku (komodita) a celkem zaplaceno za jednotlivá vyúčtování
    (s DPH, po případné slevě); sloupce podle tabulky vody. Ceny jsou v Kč/MWh bez DPH, zobrazují se jako Kč/kWh s DPH. */
@@ -134,7 +149,7 @@ function vyvojCenKarta(b){
     <div class="cardhead"><h3>${b.nazev} · Vývoj cen energií</h3>
       <div class="addr">Cena samotné elektřiny a plynu (komodita bez distribuce a regulovaných plateb), ceny jsou včetně DPH 21 %</div></div>
     <div class="block blk-energie">
-      ${vyvojTabulka("Elektřina (sazba D02d, vysoký tarif)", v.elektrina, v.dph)}
+      ${v.elektrinaRoky ? elektrinaTabulka(v.elektrinaRoky, v.dph) : vyvojTabulka("Elektřina (sazba D02d, vysoký tarif)", v.elektrina, v.dph)}
       <div style="border-top:1px solid var(--line);margin:14px 0"></div>
       ${v.plynVyuctovani ? plynTabulka(v.plynVyuctovani, v.dph) : vyvojTabulka("Plyn", v.plyn, v.dph)}
       <div class="ph-note">${v.pozn}</div>
