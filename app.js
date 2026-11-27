@@ -103,15 +103,15 @@ function plynTabulka(radky, dph){
       <td style="white-space:nowrap">${maVyuct?`${r.kwh.toLocaleString("cs-CZ",{maximumFractionDigits:0})} kWh`:""}</td>
       <td class="ph-cena">${maVyuct?`<div class="ph-barwrap"><i style="width:${(zaplaceno(r)/max*100).toFixed(0)}%"></i></div><b>${kcH(zaplaceno(r))}</b>`:""}</td>
       <td style="white-space:nowrap">${maVyuct?cenaKwhDph(r.celkem/r.kwh*1000):""}</td>
-      <td>${maVyuct?kcH(r.zalohy):""}${r.zalohyPozn?`<br><span class="ph-src">${r.zalohyPozn}</span>`:""}</td>
-      <td style="white-space:nowrap">${vys}</td></tr>`;
+      <td>${maVyuct?kcH(r.zalohy):""}${r.zalohyPreplatek?`<br><span class="ph-src">+ ${kcH(r.zalohyPreplatek)} uhrazeno z přeplatku z předchozího vyúčtování</span>`:""}</td>
+      <td style="white-space:nowrap">${vys}${r.vysledekPozn?`<br><span class="ph-src">${r.vysledekPozn}</span>`:""}</td></tr>`;
   }).join("");
   return `<div class="btitle btitle-komodita">Plyn – ceny a celkem zaplaceno za vyúčtování (s DPH)</div>
     <div class="ph-scroll"><table class="ph"><thead><tr>
       <th>Období</th><th>Produkt</th><th>Cena plynu Kč/kWh</th><th>Stálý plat / měs.</th><th>Spotřeba</th><th>Celkem zaplaceno</th><th>Kč za 1 kWh celkem</th><th>Zálohy</th><th>Výsledek</th>
     </tr></thead><tbody>${tr}</tbody></table></div>
     <div class="ph-note">Když se v období změnila cena, je uvedena jako „původní → nová“. „Cena plynu“ je samotná komodita, „Kč za 1 kWh celkem“ je celkem zaplaceno děleno spotřebou, tedy včetně distribuce, stálého platu a DPH. U krátkých období je cena vyšší, protože se stálý plat rozpočítá na malou spotřebu.
-      „Zálohy“ jsou zúčtované zálohy podle faktury; mohou zahrnovat i přeplatek z předchozího vyúčtování, nejde proto vždy o peníze skutečně poslané v daném období.</div>`;
+      „Zálohy“ jsou skutečně zaplacené zálohy; byl-li na zálohy použit přeplatek z předchozího vyúčtování, je uvedený zvlášť. Přeplatek je buď vrácen, nebo použit na další zálohy.</div>`;
 }
 function vyvojCenKarta(b){
   const v=b.vyvojCen;
