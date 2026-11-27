@@ -83,15 +83,14 @@ function vyvojTabulka(nazev, radky, dph){
 }
 /* Elektřina: řádek = kalendářní rok, součty z měsíčních faktur PRE (s DPH). Elektřina se vyúčtovává každý měsíc
    zpětně a platí se inkasem, proto nejsou zálohy. Ceny jsou v Kč/MWh bez DPH, zobrazují se jako Kč/kWh s DPH.
-   Šedě jsou celé kalendářní roky, rok s neúplnými daty (první a poslední) zůstává bez barvy. */
+   Lichá léta jsou tmavěji šedá, sudá světlá. */
 function elektrinaTabulka(roky, dph){
   const max = Math.max(...roky.map(r=>r.zaplaceno));
   const bezOpakovani = a => a.filter((x,i)=>i===0||x!==a[i-1]);
   const cenaTxt = a => bezOpakovani(a).map(x=>cenaKwhDph(x*dph)).join(" → ");
   const platTxt = a => bezOpakovani(a).map(x=>x.toLocaleString("cs-CZ")).join(" → ")+" Kč";
   const tr = roky.map((r,i)=>{
-    const cely = !r.pozn;
-    return `<tr class="${i===roky.length-1?"ph-now":""}${cely?" rok-b":""}">
+    return `<tr class="${i===roky.length-1?"ph-now":""} rok-${r.rok%2?"b":"a"}">
       <td style="white-space:nowrap">${r.rok}${r.pozn?`<br><span class="ph-src">${r.pozn}</span>`:""}</td>
       <td>${r.produkty.join(" → ")}</td>
       <td style="white-space:nowrap">${cenaTxt(r.mwh)}</td>
