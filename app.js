@@ -61,6 +61,7 @@ function dalsiVyroci(den, mesic){
 }
 /* --- vývoj cen energií (Botanika) --- */
 const cenaKwh = n => (n/1000).toLocaleString("cs-CZ",{minimumFractionDigits:2,maximumFractionDigits:3});
+const cenaKwhDph = mwhDph => (mwhDph/1000).toLocaleString("cs-CZ",{minimumFractionDigits:2,maximumFractionDigits:2});
 function vyvojTabulka(nazev, radky, dph){
   const max = Math.max(...radky.map(r=>r.mwh));
   const tr = radky.map((r,i)=>{
@@ -70,28 +71,45 @@ function vyvojTabulka(nazev, radky, dph){
     const posledni = i===radky.length-1;
     return `<tr${posledni?' class="ph-now"':''}>
       <td>${r.obdobi}</td><td>${r.produkt}</td>
-      <td class="ph-cena"><div class="ph-barwrap"><i style="width:${(r.mwh/max*100).toFixed(0)}%"></i></div><b>${cenaKwh(r.mwh)}</b></td>
+      <td class="ph-cena"><div class="ph-barwrap"><i style="width:${(r.mwh/max*100).toFixed(0)}%"></i></div><b>${cenaKwhDph(r.mwh*dph)}</b></td>
       <td style="white-space:nowrap">${zmHtml}</td>
-      <td>${(r.mwh*dph/1000).toLocaleString("cs-CZ",{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
       <td>${r.plat.toLocaleString("cs-CZ",{minimumFractionDigits:r.plat%1?2:0})} Kč</td>
       <td class="ph-src">${r.zdroj}</td></tr>`;
   }).join("");
   return `<div class="btitle btitle-komodita">${nazev}</div>
     <div class="ph-scroll"><table class="ph"><thead><tr>
-      <th>Období</th><th>Produkt</th><th>Kč/kWh bez DPH</th><th>Změna</th><th>s DPH</th><th>Stálý plat / měs.</th><th>Zdroj</th>
+      <th>Období</th><th>Produkt</th><th>Kč/kWh s DPH</th><th>Změna</th><th>Stálý plat / měs.</th><th>Zdroj</th>
+    </tr></thead><tbody>${tr}</tbody></table></div>`;
+}
+/* Plyn: celkem zaplaceno za jednotlivá vyúčtování (s DPH, po případné slevě) */
+function plynVyuctovaniTabulka(radky){
+  const tr = radky.map((r,i)=>{
+    const zaplaceno = r.celkem - (r.sleva||0);
+    const vys = r.vysledek>0 ? `doplatek ${kcH(r.vysledek)}` : `<span style="color:var(--green)">přeplatek ${kcH(-r.vysledek)}</span>`;
+    return `<tr${i===radky.length-1?' class="ph-now"':''}>
+      <td>${r.obdobi}</td>
+      <td style="white-space:nowrap">${r.kwh.toLocaleString("cs-CZ",{maximumFractionDigits:0})} kWh</td>
+      <td style="white-space:nowrap"><b>${kcH(zaplaceno)}</b></td>
+      <td style="white-space:nowrap">${cenaKwhDph(r.celkem/r.kwh*1000)}</td>
+      <td style="white-space:nowrap">${kcH(r.zalohy)}</td>
+      <td style="white-space:nowrap">${vys}</td>
+      <td class="ph-src">${r.zdroj}${r.sleva?`, sleva ${kc(r.sleva)} (Kč/kWh je před slevou)`:""}</td></tr>`;
+  }).join("");
+  return `<div class="btitle btitle-komodita">Plyn – celkem zaplaceno za vyúčtování (s DPH)</div>
+    <div class="ph-scroll"><table class="ph"><thead><tr>
+      <th>Období</th><th>Spotřeba</th><th>Zaplaceno celkem</th><th>Kč/kWh s DPH</th><th>Zálohy</th><th>Výsledek</th><th>Zdroj</th>
     </tr></thead><tbody>${tr}</tbody></table></div>`;
 }
 function vyvojCenKarta(b){
   const v=b.vyvojCen;
-  const celkem = v.plynCelkem.map(([o,c])=>`${o}: <b>${c.toLocaleString("cs-CZ",{minimumFractionDigits:2})} Kč/kWh</b>`).join(" · ");
   return `<div class="card common c-${b.id}">
     <div class="cardhead"><h3>${b.nazev} · Vývoj cen energií</h3>
-      <div class="addr">Cena samotné elektřiny a plynu (komodita bez distribuce a regulovaných plateb), DPH 21 %</div></div>
+      <div class="addr">Cena samotné elektřiny a plynu (komodita bez distribuce a regulovaných plateb), ceny jsou včetně DPH 21 %</div></div>
     <div class="block blk-energie">
       ${vyvojTabulka("Elektřina (sazba D02d, vysoký tarif)", v.elektrina, v.dph)}
       <div style="border-top:1px solid var(--line);margin:14px 0"></div>
       ${vyvojTabulka("Plyn", v.plyn, v.dph)}
-      <div class="ph-note"><b>Průměrná cena plynu včetně distribuce</b> z ročních vyúčtování (bez DPH): ${celkem}</div>
+      ${v.plynVyuctovani ? `<div style="border-top:1px solid var(--line);margin:14px 0"></div>${plynVyuctovaniTabulka(v.plynVyuctovani)}` : ""}
       <div class="ph-note">${v.pozn}</div>
     </div>
   </div>`;
