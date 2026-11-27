@@ -108,10 +108,10 @@ function elektrinaTabulka(roky, dph){
   }).join("");
   return `<div class="btitle btitle-komodita">Elektřina (sazba D02d, vysoký tarif) – ceny a zaplaceno po kalendářních letech (s DPH)</div>
     <div class="ph-scroll"><table class="ph ph-el"><thead><tr>
-      <th>Rok</th><th>Cena elektřiny Kč/kWh</th><th>Ostatní poplatky Kč/kWh</th><th>Kč za 1 kWh celkem</th><th>Měsíční záloha</th><th>Zálohy celkem</th><th>Přeplatek / nedoplatek</th><th>Zaplaceno celkem</th>
+      <th>Rok</th><th>Cena elektřiny Kč/kWh</th><th>Poplatky Kč/kWh</th><th>Kč za 1 kWh celkem</th><th>Měsíční záloha</th><th>Zálohy celkem</th><th>Přeplatek / nedoplatek</th><th>Zaplaceno celkem</th>
     </tr></thead><tbody>${tr}</tbody></table></div>
-    <div class="ph-note">„Cena elektřiny“ je samotná silová elektřina (při změně ceny během roku „původní → nová“). „Ostatní poplatky“ jsou stálý plat, distribuce, regulované poplatky, daň z elektřiny a DPH, počítané na 1 kWh.
-      „Kč za 1 kWh celkem“ je součet obou, před slevami, děleno spotřebou; u roku se změnou ceny je „Ostatní poplatky“ dopočtené z průměrné ceny elektřiny za rok. „Zaplaceno celkem“ je vyúčtovaná spotřeba z měsíčních faktur po slevách.
+    <div class="ph-note">„Cena elektřiny“ je samotná silová elektřina (při změně ceny během roku „původní → nová“). „Poplatky“ jsou stálý plat, distribuce, regulované poplatky, daň z elektřiny a DPH, počítané na 1 kWh.
+      „Kč za 1 kWh celkem“ je součet obou, před slevami, děleno spotřebou; u roku se změnou ceny jsou „Poplatky“ dopočtené z průměrné ceny elektřiny za rok. „Zaplaceno celkem“ je vyúčtovaná spotřeba z měsíčních faktur po slevách.
       Údaje jsou z faktur FOSFA (od 11/2018 do 4/2021), GAS INT (od 5/2021 do 10/2022) a PRE (od 10/2022 do 10/2026). FOSFA a GAS INT vyúčtovávaly měsíčně proti zálohám; PRE nemá zálohy a měsíční faktura se platí inkasem.
       ${roky.filter(r=>r.vysledekPozn).map(r=>`<br>Rok ${r.rok}: ${r.vysledekPozn}`).join("")}</div>`;
 }
