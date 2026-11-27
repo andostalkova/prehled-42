@@ -81,32 +81,39 @@ function vyvojTabulka(nazev, radky, dph){
       <th>Období</th><th>Produkt</th><th>Kč/kWh s DPH</th><th>Změna</th><th>Stálý plat / měs.</th><th>Zdroj</th>
     </tr></thead><tbody>${tr}</tbody></table></div>`;
 }
-/* Elektřina: řádek = kalendářní rok, součty z měsíčních faktur PRE (s DPH). Elektřina se vyúčtovává každý měsíc
-   zpětně a platí se inkasem, proto nejsou zálohy. Ceny jsou v Kč/MWh bez DPH, zobrazují se jako Kč/kWh s DPH.
+/* Elektřina: řádek = kalendářní rok, součty z měsíčních faktur dodavatelů (s DPH): FOSFA 11/2018–4/2021, GAS INT 5/2021–10/2022 (se zálohami
+   a měsíčním přeplatkem nebo nedoplatkem), PRE od 10/2022 (bez záloh, platí se inkasem). Ceny jsou v Kč/MWh bez DPH, zobrazují se jako Kč/kWh s DPH.
    Lichá léta jsou tmavěji šedá, sudá světlá. */
 function elektrinaTabulka(roky, dph){
   const max = Math.max(...roky.map(r=>r.zaplaceno));
   const bezOpakovani = a => a.filter((x,i)=>i===0||x!==a[i-1]);
-  const cenaTxt = a => bezOpakovani(a).map(x=>cenaKwhDph(x*dph)).join(" → ");
-  const platTxt = a => bezOpakovani(a).map(x=>x.toLocaleString("cs-CZ")).join(" → ")+" Kč";
+  const cenaTxt = a => a ? bezOpakovani(a).map(x=>cenaKwhDph(x*dph)).join(" → ") : "";
+  const platTxt = a => a ? bezOpakovani(a).map(x=>Math.round(x).toLocaleString("cs-CZ")).join(" → ")+" Kč" : "";
+  const fakturTxt = n => n+" "+(n<5?"faktury":"faktur");
+  const vysledekTxt = r => {
+    if(r.vysledek==null) return `inkaso (${fakturTxt(r.faktur)})`;
+    const v = r.vysledek>0 ? `<span style="color:var(--red)">nedoplatek ${kcH(r.vysledek)}</span>` : `<span style="color:var(--green)">přeplatek ${kcH(-r.vysledek)}</span>`;
+    return v + (r.inkaso ? `<br>PRE: inkaso (${fakturTxt(r.inkaso)})` : "");
+  };
   const tr = roky.map((r,i)=>{
     return `<tr class="${i===roky.length-1?"ph-now":""} rok-${r.rok%2?"b":"a"}">
-      <td style="white-space:nowrap">${r.rok}${r.pozn?`<br><span class="ph-src">${r.pozn}</span>`:""}</td>
+      <td style="white-space:nowrap">${r.rok}${r.pozn?`<br><span class="ph-src" style="white-space:normal">${r.pozn}</span>`:""}</td>
       <td>${r.produkty.join(" → ")}</td>
       <td style="white-space:nowrap">${cenaTxt(r.mwh)}</td>
       <td style="white-space:nowrap">${platTxt(r.platy)}</td>
       <td style="white-space:nowrap">${r.kwh.toLocaleString("cs-CZ")} kWh</td>
       <td style="white-space:nowrap">${(r.vyuct/r.kwh).toLocaleString("cs-CZ",{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
-      <td>nejsou</td>
-      <td>inkaso (${r.faktur} ${r.faktur<5?"faktury":"faktur"})</td>
+      <td>${r.zalohy!=null?kcH(r.zalohy):"nejsou"}</td>
+      <td>${vysledekTxt(r)}</td>
       <td class="ph-cena"><div class="ph-barwrap"><i style="width:${(r.zaplaceno/max*100).toFixed(0)}%"></i></div><b>${kcH(r.zaplaceno)}</b></td></tr>`;
   }).join("");
   return `<div class="btitle btitle-komodita">Elektřina (sazba D02d, vysoký tarif) – ceny a zaplaceno po kalendářních letech (s DPH)</div>
     <div class="ph-scroll"><table class="ph ph-zar"><thead><tr>
       <th>Rok</th><th>Produkt</th><th>Cena elektřiny Kč/kWh</th><th>Stálý plat / měs.</th><th>Spotřeba</th><th>Kč za 1 kWh celkem</th><th>Zálohy</th><th>Přeplatek / nedoplatek</th><th>Zaplaceno celkem</th>
     </tr></thead><tbody>${tr}</tbody></table></div>
-    <div class="ph-note">Když se v roce změnila cena nebo produkt, je uvedeno „původní → nové“. „Cena elektřiny“ je samotná komodita, „Kč za 1 kWh celkem“ je elektřina a regulované služby s DPH, před slevami, děleno spotřebou.
-      „Zaplaceno celkem“ je součet částek k úhradě z měsíčních faktur po slevách. Spotřeba a platby jsou za měsíce s fakturami PRE, tedy od 10/2022 do 10/2026.
+    <div class="ph-note">Když se v roce změnila cena nebo produkt, je uvedeno „původní → nové“. „Cena elektřiny“ je samotná komodita (u FOSFA a GAS INT z faktur nevyplývá), „Kč za 1 kWh celkem“ je elektřina a regulované služby s DPH, před slevami, děleno spotřebou.
+      „Zaplaceno celkem“ je vyúčtovaná spotřeba z měsíčních faktur po slevách. Spotřeba a platby jsou z faktur FOSFA (od 11/2018 do 4/2021), GAS INT (od 5/2021 do 10/2022) a PRE (od 10/2022 do 10/2026).
+      FOSFA a GAS INT vyúčtovávaly měsíčně proti zálohám; PRE nemá zálohy a platí se měsíční faktura inkasem.
       ${roky.filter(r=>r.vysledekPozn).map(r=>`<br>Rok ${r.rok}: ${r.vysledekPozn}`).join("")}</div>`;
 }
 /* Plyn: jedna tabulka – cena plynu z ceníku (komodita) a celkem zaplaceno za jednotlivá vyúčtování
