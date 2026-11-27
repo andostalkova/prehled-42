@@ -98,10 +98,10 @@ function elektrinaTabulka(roky, dph){
     const ostatni = r.cenaPrum!=null ? (r.vyuct/r.kwh - r.cenaPrum).toLocaleString("cs-CZ",{minimumFractionDigits:2,maximumFractionDigits:2}) : "";
     return `<tr class="${i===roky.length-1?"ph-now":""} rok-${r.rok%2?"b":"a"}">
       <td style="white-space:nowrap">${r.rok}${r.pozn?`<br><span class="ph-src" style="white-space:normal">${r.pozn}</span>`:""}</td>
-      <td style="white-space:nowrap">${cenaTxt(r.mwh)}</td>
+      <td>${cenaTxt(r.mwh)}</td>
       <td style="white-space:nowrap">${ostatni}</td>
       <td style="white-space:nowrap">${(r.vyuct/r.kwh).toLocaleString("cs-CZ",{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
-      <td style="white-space:nowrap">${r.zalohaMes ? bezOpakovani(r.zalohaMes).map(x=>Math.round(x).toLocaleString("cs-CZ")).join(" → ")+" Kč" : "nejsou"}</td>
+      <td>${r.zalohaMes ? bezOpakovani(r.zalohaMes).map(x=>Math.round(x).toLocaleString("cs-CZ")).join(" → ")+" Kč" : "nejsou"}</td>
       <td>${r.zalohy!=null?kcH(r.zalohy):"nejsou"}</td>
       <td>${vysledekTxt(r)}</td>
       <td class="ph-cena"><div class="ph-barwrap"><i style="width:${(r.zaplaceno/max*100).toFixed(0)}%"></i></div><b>${kcH(r.zaplaceno)}</b></td></tr>`;
