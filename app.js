@@ -87,7 +87,8 @@ function vyvojTabulka(nazev, radky, dph){
 function elektrinaTabulka(roky, dph){
   const max = Math.max(...roky.map(r=>r.zaplaceno));
   const bezOpakovani = a => a.filter((x,i)=>i===0||x!==a[i-1]);
-  const cenaTxt = a => a ? bezOpakovani(a).map(x=>cenaKwhDph(x*dph)).join(" → ")+" Kč" : "";
+  const prvniPosledni = a => { const b = bezOpakovani(a); return b.length>2 ? [b[0], b[b.length-1]] : b; };   // při více změnách jen první a poslední hodnota
+  const cenaTxt = a => a ? prvniPosledni(a).map(x=>cenaKwhDph(x*dph)).join(" → ")+" Kč" : "";
   const fakturTxt = n => n+" "+(n<5?"faktury":"faktur");
   const vysledekTxt = r => {
     if(r.vysledek==null) return `inkaso (${fakturTxt(r.faktur)})`;
@@ -101,7 +102,7 @@ function elektrinaTabulka(roky, dph){
       <td>${cenaTxt(r.mwh)}</td>
       <td style="white-space:nowrap">${ostatni}</td>
       <td style="white-space:nowrap">${(r.vyuct/r.kwh).toLocaleString("cs-CZ",{minimumFractionDigits:2,maximumFractionDigits:2})} Kč</td>
-      <td>${r.zalohaMes ? bezOpakovani(r.zalohaMes).map(x=>Math.round(x).toLocaleString("cs-CZ")).join(" → ")+" Kč" : "nejsou"}</td>
+      <td>${r.zalohaMes ? prvniPosledni(r.zalohaMes).map(x=>Math.round(x).toLocaleString("cs-CZ")).join(" → ")+" Kč" : "nejsou"}</td>
       <td>${r.zalohy!=null?kcH(r.zalohy):"nejsou"}</td>
       <td>${vysledekTxt(r)}</td>
       <td class="ph-cena"><div class="ph-barwrap"><i style="width:${(r.zaplaceno/max*100).toFixed(0)}%"></i></div><b>${kcH(r.zaplaceno)}</b></td></tr>`;
@@ -122,8 +123,9 @@ function plynTabulka(radky, dph){
   const zaokr = x => Math.round(x*100)/100;
   const zaplaceno = r => zaokr(r.celkem-(r.sleva||0));
   const max = Math.max(...radky.filter(r=>r.kwh).map(zaplaceno));
-  const cenaTxt = a => a.map(x=>cenaKwhDph(x*dph)).join(" → ")+" Kč";
-  const platTxt = a => a.map(x=>Math.round(x).toLocaleString("cs-CZ")).join(" → ")+" Kč";
+  const prvniPosledni = a => a.length>2 ? [a[0], a[a.length-1]] : a;   // při více změnách jen první a poslední hodnota
+  const cenaTxt = a => prvniPosledni(a).map(x=>cenaKwhDph(x*dph)).join(" → ")+" Kč";
+  const platTxt = a => prvniPosledni(a).map(x=>Math.round(x).toLocaleString("cs-CZ")).join(" → ")+" Kč";
   const tr = radky.map((r,i)=>{
     const maVyuct = r.kwh != null;
     const vys = !maVyuct ? "" : r.vysledek>0 ? `<span style="color:var(--red)">nedoplatek ${kcH(r.vysledek)}</span>` : `<span style="color:var(--green)">přeplatek ${kcH(-r.vysledek)}</span>`;
