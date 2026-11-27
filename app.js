@@ -99,6 +99,7 @@ function elektrinaTabulka(roky, dph){
     const ostatni = r.cenaPrum!=null ? (r.vyuct/r.kwh - r.cenaPrum).toLocaleString("cs-CZ",{minimumFractionDigits:2,maximumFractionDigits:2})+" Kč" : "";
     return `<tr class="${i===roky.length-1?"ph-now":""} rok-${r.rok%2?"b":"a"}">
       <td style="white-space:nowrap">${r.rok}${r.pozn?`<br><span class="ph-src" style="white-space:normal">${r.pozn}</span>`:""}</td>
+      <td style="white-space:nowrap">${r.kwh.toLocaleString("cs-CZ")} kWh</td>
       <td>${cenaTxt(r.mwh)}</td>
       <td style="white-space:nowrap">${ostatni}</td>
       <td style="white-space:nowrap">${(r.vyuct/r.kwh).toLocaleString("cs-CZ",{minimumFractionDigits:2,maximumFractionDigits:2})} Kč</td>
@@ -109,7 +110,7 @@ function elektrinaTabulka(roky, dph){
   }).join("");
   return `<div class="btitle btitle-komodita">Elektřina (sazba D02d, vysoký tarif) – ceny a zaplaceno po kalendářních letech (s DPH)</div>
     <div class="ph-scroll"><table class="ph ph-el"><thead><tr>
-      <th>Rok</th><th>Cena elektřiny/kWh</th><th>Poplatky/kWh</th><th>Celkem/kWh</th><th>Měsíční záloha</th><th>Zálohy celkem</th><th>Přeplatek / nedoplatek</th><th>Zaplaceno celkem</th>
+      <th>Rok</th><th>Spotřeba</th><th>Cena elektřiny/kWh</th><th>Poplatky/kWh</th><th>Celkem/kWh</th><th>Měsíční záloha</th><th>Zálohy celkem</th><th>Přeplatek / nedoplatek</th><th>Zaplaceno celkem</th>
     </tr></thead><tbody>${tr}</tbody></table></div>
     <div class="ph-note">„Cena elektřiny“ je samotná silová elektřina (při změně ceny během roku „původní → nová“). „Poplatky“ jsou stálý plat, distribuce, regulované poplatky, daň z elektřiny a DPH, počítané na 1 kWh.
       „Celkem/kWh“ je součet obou, před slevami, děleno spotřebou; u roku se změnou ceny jsou „Poplatky“ dopočtené z průměrné ceny elektřiny za rok. „Zaplaceno celkem“ je vyúčtovaná spotřeba z měsíčních faktur po slevách.
@@ -137,6 +138,7 @@ function plynTabulka(radky, dph){
     return `<tr class="${i===radky.length-1?"ph-now":""}${rocni?" rok-b":""}">
       <td style="white-space:nowrap">${obdobi}${pozn?`<br><span class="ph-src" style="white-space:normal">${pozn}</span>`:""}</td>
       <td>${r.produkt}</td>
+      <td style="white-space:nowrap">${maVyuct?`${r.kwh.toLocaleString("cs-CZ",{maximumFractionDigits:0})} kWh`:""}</td>
       <td>${cenaTxt(r.ceny)}</td>
       <td style="white-space:nowrap">${poplatky}</td>
       <td style="white-space:nowrap">${maVyuct?cenaKwhDph(kwhCelkem*1000)+" Kč":""}</td>
@@ -147,7 +149,7 @@ function plynTabulka(radky, dph){
   }).join("");
   return `<div class="btitle btitle-komodita">Plyn – ceny a celkem zaplaceno za vyúčtování (s DPH)</div>
     <div class="ph-scroll"><table class="ph ph-zar"><thead><tr>
-      <th>Období</th><th>Produkt</th><th>Cena plynu/kWh</th><th>Poplatky/kWh</th><th>Celkem/kWh</th><th>Měsíční záloha</th><th>Zálohy celkem</th><th>Přeplatek / nedoplatek</th><th>Zaplaceno celkem</th>
+      <th>Období</th><th>Produkt</th><th>Spotřeba</th><th>Cena plynu/kWh</th><th>Poplatky/kWh</th><th>Celkem/kWh</th><th>Měsíční záloha</th><th>Zálohy celkem</th><th>Přeplatek / nedoplatek</th><th>Zaplaceno celkem</th>
     </tr></thead><tbody>${tr}</tbody></table></div>
     <div class="ph-note">Řádky jsou podle období jednotlivých produktů a dodavatelů. Když se v období změnila cena, je uvedena jako „původní → nová“. „Cena plynu“ je samotná komodita. „Poplatky“ jsou stálý plat, distribuce, daň a DPH, počítané na 1 kWh; „Celkem/kWh“ je součet obou, tedy celkem zaplaceno děleno spotřebou. U období se změnou ceny jsou „Poplatky“ dopočtené z průměrné ceny plynu za období. U krátkých období je cena vyšší, protože se stálý plat rozpočítá na malou spotřebu.
       „Zálohy celkem“ jsou skutečně zaplacené zálohy; byl-li na zálohy použit přeplatek z předchozího vyúčtování, je uvedený zvlášť. Přeplatek je buď vrácen, nebo použit na další zálohy.</div>`;

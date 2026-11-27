@@ -184,16 +184,16 @@ h2{font-size:14px;text-transform:uppercase;letter-spacing:.07em;color:var(--mute
   overflow:hidden;margin-right:8px;vertical-align:middle}
 .ph-barwrap i{display:block;height:100%;background:var(--c-energie);border-radius:99px}
 .ph tr.ph-now td{font-weight:600;background:var(--accent-soft)}
-/* tabulky plynu a elektřiny mají stejné sloupce a stejné šířky */
-.ph.ph-zar{table-layout:fixed;min-width:1150px}
-.ph.ph-zar th:nth-child(1){width:11%}.ph.ph-zar th:nth-child(2){width:15%}.ph.ph-zar th:nth-child(3){width:10%}
-.ph.ph-zar th:nth-child(4){width:9%}.ph.ph-zar th:nth-child(5){width:9%}.ph.ph-zar th:nth-child(6){width:11%}
-.ph.ph-zar th:nth-child(7){width:10%}.ph.ph-zar th:nth-child(8){width:12%}.ph.ph-zar th:nth-child(9){width:13%}
+/* tabulka plynu (10 sloupců) */
+.ph.ph-zar{table-layout:fixed;min-width:1250px}
+.ph.ph-zar th:nth-child(1){width:10%}.ph.ph-zar th:nth-child(2){width:13%}.ph.ph-zar th:nth-child(3){width:8%}
+.ph.ph-zar th:nth-child(4){width:9%}.ph.ph-zar th:nth-child(5){width:8%}.ph.ph-zar th:nth-child(6){width:8%}
+.ph.ph-zar th:nth-child(7){width:10%}.ph.ph-zar th:nth-child(8){width:10%}.ph.ph-zar th:nth-child(9){width:12%}.ph.ph-zar th:nth-child(10){width:12%}
 .ph.ph-zar td.ph-cena{min-width:0}
-/* tabulka elektřiny (8 sloupců) */
-.ph.ph-el{table-layout:fixed;min-width:1050px}
-.ph.ph-el th:nth-child(1){width:15%}.ph.ph-el th:nth-child(2){width:12%}.ph.ph-el th:nth-child(3){width:12%}.ph.ph-el th:nth-child(4){width:11%}
-.ph.ph-el th:nth-child(5){width:12%}.ph.ph-el th:nth-child(6){width:11%}.ph.ph-el th:nth-child(7){width:13%}.ph.ph-el th:nth-child(8){width:14%}
+/* tabulka elektřiny (9 sloupců) */
+.ph.ph-el{table-layout:fixed;min-width:1150px}
+.ph.ph-el th:nth-child(1){width:14%}.ph.ph-el th:nth-child(2){width:9%}.ph.ph-el th:nth-child(3){width:11%}.ph.ph-el th:nth-child(4){width:9%}
+.ph.ph-el th:nth-child(5){width:9%}.ph.ph-el th:nth-child(6){width:11%}.ph.ph-el th:nth-child(7){width:10%}.ph.ph-el th:nth-child(8){width:12%}.ph.ph-el th:nth-child(9){width:15%}
 .ph.ph-el td.ph-cena{min-width:0}
 /* řádky tabulky se střídavě šedí podle kalendářního roku začátku období */
 .ph tr.rok-a td,.ph tr.rok-a.ph-now td{background:var(--rok-a)}
@@ -427,7 +427,7 @@ async function spustApp(){
   if (!appLoaded) {
     appLoaded = true;
     const s = document.createElement('script');
-    s.src = 'app.js?v=54';
+    s.src = 'app.js?v=55';
     s.onerror = () => { appLoaded = false; ukazPrihlaseni('Nepodařilo se načíst aplikaci.'); };
     document.body.appendChild(s);
   }
