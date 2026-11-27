@@ -101,14 +101,14 @@ function plynTabulka(radky, dph){
       <td style="white-space:nowrap">${cenaTxt(r.ceny)}</td>
       <td style="white-space:nowrap">${platTxt(r.platy)}</td>
       <td style="white-space:nowrap">${maVyuct?`${r.kwh.toLocaleString("cs-CZ",{maximumFractionDigits:0})} kWh`:""}</td>
-      <td class="ph-cena">${maVyuct?`<div class="ph-barwrap"><i style="width:${(zaplaceno(r)/max*100).toFixed(0)}%"></i></div><b>${kcH(zaplaceno(r))}</b>`:""}</td>
       <td style="white-space:nowrap">${maVyuct?cenaKwhDph(r.celkem/r.kwh*1000):""}</td>
       <td>${maVyuct?kcH(r.zalohy):""}${r.zalohyPreplatek?`<br><span class="ph-src">+ ${kcH(r.zalohyPreplatek)} uhrazeno z přeplatku z předchozího vyúčtování</span>`:""}</td>
-      <td style="white-space:nowrap">${vys}${r.vysledekPozn?`<br><span class="ph-src">${r.vysledekPozn}</span>`:""}</td></tr>`;
+      <td style="white-space:nowrap">${vys}${r.vysledekPozn?`<br><span class="ph-src">${r.vysledekPozn}</span>`:""}</td>
+      <td class="ph-cena">${maVyuct?`<div class="ph-barwrap"><i style="width:${(zaplaceno(r)/max*100).toFixed(0)}%"></i></div><b>${kcH(zaplaceno(r))}</b>`:""}</td></tr>`;
   }).join("");
   return `<div class="btitle btitle-komodita">Plyn – ceny a celkem zaplaceno za vyúčtování (s DPH)</div>
     <div class="ph-scroll"><table class="ph"><thead><tr>
-      <th>Období</th><th>Produkt</th><th>Cena plynu Kč/kWh</th><th>Stálý plat / měs.</th><th>Spotřeba</th><th>Celkem zaplaceno</th><th>Kč za 1 kWh celkem</th><th>Zálohy</th><th>Výsledek</th>
+      <th>Období</th><th>Produkt</th><th>Cena plynu Kč/kWh</th><th>Stálý plat / měs.</th><th>Spotřeba</th><th>Kč za 1 kWh celkem</th><th>Zálohy</th><th>Přeplatek / nedoplatek</th><th>Zaplaceno celkem</th>
     </tr></thead><tbody>${tr}</tbody></table></div>
     <div class="ph-note">Když se v období změnila cena, je uvedena jako „původní → nová“. „Cena plynu“ je samotná komodita, „Kč za 1 kWh celkem“ je celkem zaplaceno děleno spotřebou, tedy včetně distribuce, stálého platu a DPH. U krátkých období je cena vyšší, protože se stálý plat rozpočítá na malou spotřebu.
       „Zálohy“ jsou skutečně zaplacené zálohy; byl-li na zálohy použit přeplatek z předchozího vyúčtování, je uvedený zvlášť. Přeplatek je buď vrácen, nebo použit na další zálohy.</div>`;
@@ -141,11 +141,11 @@ function vyvojVodyKarta(b){
       <td>${x.obdobi}${x.pozn?`<br><span class="ph-src">${x.pozn}</span>`:""}</td>
       <td style="white-space:nowrap">${x.vodne} m³${pred?` · ${proc(x.vodne,pred.vodne)}`:""}</td>
       <td>${x.stocne} m³</td>
-      <td class="ph-cena"><div class="ph-barwrap"><i style="width:${(x.celkem/max*100).toFixed(0)}%"></i></div><b>${kc(x.celkem)}</b></td>
-      <td style="white-space:nowrap">${pred?proc(x.celkem,pred.celkem):""}</td>
       <td style="white-space:nowrap">${kc(Math.round(x.celkem/x.vodne))}</td>
       <td>${kc(x.zalohy)}</td>
-      <td style="white-space:nowrap">${vys}</td></tr>`;
+      <td style="white-space:nowrap">${vys}</td>
+      <td class="ph-cena"><div class="ph-barwrap"><i style="width:${(x.celkem/max*100).toFixed(0)}%"></i></div><b>${kc(x.celkem)}</b></td>
+      <td style="white-space:nowrap">${pred?proc(x.celkem,pred.celkem):""}</td></tr>`;
   }).join("");
   const p1=r[1], pN=r[r.length-1];
   return `<div class="card common c-${b.id}">
@@ -153,10 +153,10 @@ function vyvojVodyKarta(b){
       <div class="addr">Roční vyúčtování PVK, částky včetně DPH</div></div>
     <div class="block blk-voda">
       <div class="ph-scroll"><table class="ph"><thead><tr>
-        <th>Období</th><th>Vodné</th><th>Stočné</th><th>Celkem za rok</th><th>Změna</th><th>Kč za 1 m³</th><th>Zálohy</th><th>Výsledek</th>
+        <th>Období</th><th>Vodné</th><th>Stočné</th><th>Kč za 1 m³</th><th>Zálohy</th><th>Přeplatek / nedoplatek</th><th>Zaplaceno celkem</th><th>Změna</th>
       </tr></thead><tbody>${tr}</tbody></table></div>
       <div class="ph-note">Od ${p1.obdobi.split(" – ")[0]} do ${pN.obdobi.split(" – ")[1]} vzrostla spotřeba z ${p1.vodne} na ${pN.vodne} m³ za rok
-        a roční náklady z ${kc(p1.celkem)} na ${kc(pN.celkem)}. „Kč za 1 m³“ = celkem za rok děleno vodným, tedy včetně stočného a DPH.</div>
+        a roční náklady z ${kc(p1.celkem)} na ${kc(pN.celkem)}. „Kč za 1 m³“ = zaplaceno celkem děleno vodným, tedy včetně stočného a DPH.</div>
     </div>
   </div>`;
 }
@@ -1120,6 +1120,38 @@ document.getElementById("resetdone").onclick = async () => {
   if(r.error){ renderNote("Odškrtnutí se nepodařilo zrušit: " + r.error.message); return; }
   done = {}; renderTimeline(); renderCollapse();
 };
+
+// V kartách (bloky objektů) se data zkracují na měsíc/rok. Úkoly, události, platby, upozornění "Chybí nebo ověřit"
+// a lhůty s odznakem ve dnech (např. "za 18 dní") zůstávají s celým datem.
+function zkratDatumyVBlocich(){
+  const MS = "[ \u00a0]?";
+  const dnyDen = new RegExp("(\\d{1,2})\\.[–-](\\d{1,2})\\."+MS+"(\\d{1,2})\\."+MS+"(\\d{4})","g");
+  const rozsah = new RegExp("(\\d{1,2})\\."+MS+"(\\d{1,2})\\."+MS+"[–-]"+MS+"(\\d{1,2})\\."+MS+"(\\d{1,2})\\."+MS+"(\\d{4})","g");
+  const rozsahRoky = new RegExp("(\\d{1,2})\\."+MS+"(\\d{1,2})\\."+MS+"(\\d{4})"+MS+"[–-]"+MS+"(\\d{1,2})\\."+MS+"(\\d{1,2})\\."+MS+"(\\d{4})","g");
+  const datum = new RegExp("(\\d{1,2})\\."+MS+"(\\d{1,2})\\."+MS+"(\\d{4})","g");
+  const spoj = (m1,y1,m2,y2) => (m1===m2 && y1===y2) ? m1+"/"+y1 : m1+"/"+y1+" – "+m2+"/"+y2;
+  document.querySelectorAll(".block").forEach(blok=>{
+    if(blok.closest(".warnbox, .col-ukoly, .col-platby, .ev")) return;
+    const w = document.createTreeWalker(blok, NodeFilter.SHOW_TEXT);
+    for(let n=w.nextNode(); n; n=w.nextNode()){
+      const t = n.nodeValue;
+      if(!/\d{4}/.test(t)) continue;
+      const radek = n.parentElement && n.parentElement.closest(".row");
+      const badge = radek && radek.querySelector(".badge");
+      if(badge && /dn[íyů]|\bden\b|zítra|dnes|termín|prodlen/i.test(badge.textContent)) continue;
+      const nove = t.replace(dnyDen, "$3/$4")
+        .replace(rozsahRoky, (_,d1,m1,y1,d2,m2,y2)=>spoj(+m1,y1,+m2,y2))
+        .replace(rozsah, (_,d1,m1,d2,m2,y)=>spoj(+m1,y,+m2,y))
+        .replace(datum, "$2/$3");
+      if(nove !== t) n.nodeValue = nove;
+    }
+  });
+}
+let zkratDatumyCasovac = null;
+new MutationObserver(()=>{
+  clearTimeout(zkratDatumyCasovac);
+  zkratDatumyCasovac = setTimeout(zkratDatumyVBlocich, 30);
+}).observe(document.body, { childList:true, subtree:true });
 
 document.getElementById("today").textContent =
   "dnes " + TODAY.toLocaleDateString("cs-CZ",{day:"numeric",month:"long",year:"numeric"});
