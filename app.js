@@ -98,7 +98,7 @@ function elektrinaTabulka(roky, dph){
       <td style="white-space:nowrap">${r.kwh.toLocaleString("cs-CZ")} kWh</td>
       <td style="white-space:nowrap">${(r.vyuct/r.kwh).toLocaleString("cs-CZ",{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
       <td>nejsou</td>
-      <td>měsíčně dorovnáno inkasem (${r.faktur} ${r.faktur<5?"faktury":"faktur"})${r.vysledekPozn?`<br><span class="ph-src">${r.vysledekPozn}</span>`:""}</td>
+      <td>inkaso (${r.faktur} ${r.faktur<5?"faktury":"faktur"})</td>
       <td class="ph-cena"><div class="ph-barwrap"><i style="width:${(r.zaplaceno/max*100).toFixed(0)}%"></i></div><b>${kcH(r.zaplaceno)}</b></td></tr>`;
   }).join("");
   return `<div class="btitle btitle-komodita">Elektřina (sazba D02d, vysoký tarif) – ceny a zaplaceno po kalendářních letech (s DPH)</div>
@@ -106,7 +106,8 @@ function elektrinaTabulka(roky, dph){
       <th>Rok</th><th>Produkt</th><th>Cena elektřiny Kč/kWh</th><th>Stálý plat / měs.</th><th>Spotřeba</th><th>Kč za 1 kWh celkem</th><th>Zálohy</th><th>Přeplatek / nedoplatek</th><th>Zaplaceno celkem</th>
     </tr></thead><tbody>${tr}</tbody></table></div>
     <div class="ph-note">Když se v roce změnila cena nebo produkt, je uvedeno „původní → nové“. „Cena elektřiny“ je samotná komodita, „Kč za 1 kWh celkem“ je elektřina a regulované služby s DPH, před slevami, děleno spotřebou.
-      „Zaplaceno celkem“ je součet částek k úhradě z měsíčních faktur po slevách. Spotřeba a platby jsou za měsíce s fakturami PRE, tedy od 10/2022 do 10/2026.</div>`;
+      „Zaplaceno celkem“ je součet částek k úhradě z měsíčních faktur po slevách. Spotřeba a platby jsou za měsíce s fakturami PRE, tedy od 10/2022 do 10/2026.
+      ${roky.filter(r=>r.vysledekPozn).map(r=>`<br>Rok ${r.rok}: ${r.vysledekPozn}`).join("")}</div>`;
 }
 /* Plyn: jedna tabulka – cena plynu z ceníku (komodita) a celkem zaplaceno za jednotlivá vyúčtování
    (s DPH, po případné slevě); sloupce podle tabulky vody. Ceny jsou v Kč/MWh bez DPH, zobrazují se jako Kč/kWh s DPH. */
