@@ -125,7 +125,6 @@ function plynTabulka(radky, dph){
   const max = Math.max(...radky.filter(r=>r.kwh).map(zaplaceno));
   const prvniPosledni = a => a.length>2 ? [a[0], a[a.length-1]] : a;   // při více změnách jen první a poslední hodnota
   const cenaTxt = a => prvniPosledni(a).map(x=>cenaKwhDph(x*dph)).join(" → ")+" Kč";
-  const platTxt = a => prvniPosledni(a).map(x=>Math.round(x).toLocaleString("cs-CZ")).join(" → ")+" Kč";
   const tr = radky.map((r,i)=>{
     const maVyuct = r.kwh != null;
     const vys = !maVyuct ? "" : r.vysledek>0 ? `<span style="color:var(--red)">nedoplatek ${kcH(r.vysledek)}</span>` : `<span style="color:var(--green)">přeplatek ${kcH(-r.vysledek)}</span>`;
@@ -133,23 +132,25 @@ function plynTabulka(radky, dph){
     const obdobi = r.do ? `${mesRok(r.od)}–${mesRok(r.do)}` : `od ${mesRok(r.od)}`;
     const mesicu = r.do ? (+r.do.slice(0,4)-+r.od.slice(0,4))*12 + (+r.do.slice(5,7)-+r.od.slice(5,7)) : 0;
     const rocni = mesicu>=11 && mesicu<=13;   // šedě jen období dlouhá přibližně rok
+    const kwhCelkem = maVyuct ? r.celkem/r.kwh : null;
+    const poplatky = maVyuct && r.cenaPrum!=null ? (kwhCelkem - r.cenaPrum).toLocaleString("cs-CZ",{minimumFractionDigits:2,maximumFractionDigits:2})+" Kč" : "";
     return `<tr class="${i===radky.length-1?"ph-now":""}${rocni?" rok-b":""}">
       <td style="white-space:nowrap">${obdobi}${pozn?`<br><span class="ph-src" style="white-space:normal">${pozn}</span>`:""}</td>
       <td>${r.produkt}</td>
-      <td style="white-space:nowrap">${cenaTxt(r.ceny)}</td>
-      <td style="white-space:nowrap">${platTxt(r.platy)}</td>
-      <td style="white-space:nowrap">${maVyuct?`${r.kwh.toLocaleString("cs-CZ",{maximumFractionDigits:0})} kWh`:""}</td>
-      <td style="white-space:nowrap">${maVyuct?cenaKwhDph(r.celkem/r.kwh*1000)+" Kč":""}</td>
+      <td>${cenaTxt(r.ceny)}</td>
+      <td style="white-space:nowrap">${poplatky}</td>
+      <td style="white-space:nowrap">${maVyuct?cenaKwhDph(kwhCelkem*1000)+" Kč":""}</td>
+      <td>${r.zalohaMes ? prvniPosledni(r.zalohaMes).map(x=>Math.round(x).toLocaleString("cs-CZ")).join(" → ")+" Kč" : ""}</td>
       <td>${maVyuct?kcH(r.zalohy):""}${r.zalohyPreplatek?`<br><span class="ph-src">+ ${kcH(r.zalohyPreplatek)} uhrazeno z přeplatku z předchozího vyúčtování</span>`:""}</td>
-      <td style="white-space:nowrap">${vys}${r.vysledekPozn?`<br><span class="ph-src">${r.vysledekPozn}</span>`:""}</td>
+      <td>${vys}${r.vysledekPozn?`<br><span class="ph-src">${r.vysledekPozn}</span>`:""}</td>
       <td class="ph-cena">${maVyuct?`<div class="ph-barwrap"><i style="width:${(zaplaceno(r)/max*100).toFixed(0)}%"></i></div><b>${kcH(zaplaceno(r))}</b>`:""}</td></tr>`;
   }).join("");
   return `<div class="btitle btitle-komodita">Plyn – ceny a celkem zaplaceno za vyúčtování (s DPH)</div>
     <div class="ph-scroll"><table class="ph ph-zar"><thead><tr>
-      <th>Období</th><th>Produkt</th><th>Cena plynu/kWh</th><th>Stálý plat / měs.</th><th>Spotřeba</th><th>Celkem/kWh</th><th>Zálohy</th><th>Přeplatek / nedoplatek</th><th>Zaplaceno celkem</th>
+      <th>Období</th><th>Produkt</th><th>Cena plynu/kWh</th><th>Poplatky/kWh</th><th>Celkem/kWh</th><th>Měsíční záloha</th><th>Zálohy celkem</th><th>Přeplatek / nedoplatek</th><th>Zaplaceno celkem</th>
     </tr></thead><tbody>${tr}</tbody></table></div>
-    <div class="ph-note">Když se v období změnila cena, je uvedena jako „původní → nová“. „Cena plynu“ je samotná komodita, „Celkem/kWh“ je celkem zaplaceno děleno spotřebou, tedy včetně distribuce, stálého platu a DPH. U krátkých období je cena vyšší, protože se stálý plat rozpočítá na malou spotřebu.
-      „Zálohy“ jsou skutečně zaplacené zálohy; byl-li na zálohy použit přeplatek z předchozího vyúčtování, je uvedený zvlášť. Přeplatek je buď vrácen, nebo použit na další zálohy.</div>`;
+    <div class="ph-note">Řádky jsou podle období jednotlivých produktů a dodavatelů. Když se v období změnila cena, je uvedena jako „původní → nová“. „Cena plynu“ je samotná komodita. „Poplatky“ jsou stálý plat, distribuce, daň a DPH, počítané na 1 kWh; „Celkem/kWh“ je součet obou, tedy celkem zaplaceno děleno spotřebou. U období se změnou ceny jsou „Poplatky“ dopočtené z průměrné ceny plynu za období. U krátkých období je cena vyšší, protože se stálý plat rozpočítá na malou spotřebu.
+      „Zálohy celkem“ jsou skutečně zaplacené zálohy; byl-li na zálohy použit přeplatek z předchozího vyúčtování, je uvedený zvlášť. Přeplatek je buď vrácen, nebo použit na další zálohy.</div>`;
 }
 function vyvojCenKarta(b){
   const v=b.vyvojCen;
