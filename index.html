@@ -16,6 +16,7 @@
   --amber:#8f6417; --amber-soft:#f6f1e7;
   --green:#3c7556; --green-soft:#eaf1ed;
   --grey-soft:#efefed;
+  --rok-a:#f7f7f6; --rok-b:#e3e4e7; --rok-stopa:#ffffff;
   --panel:#f7f7f6;
   --radius:12px;
   /* neutrální vzhled: kategorie i byty jsou šedé, barvu nesou jen stavy (červená/žlutá/zelená) */
@@ -32,6 +33,7 @@
     --amber:#d9b169; --amber-soft:#2e2819;
     --green:#7fc29c; --green-soft:#1c2a22;
     --grey-soft:#26282b; --panel:#232528;
+    --rok-a:#222427; --rok-b:#2f3237; --rok-stopa:#1a1b1d;
     --c-smlouva:#9a9ea7; --c-zalohy:#9a9ea7; --c-vyuct:#9a9ea7;
     --c-pojisteni:#9a9ea7; --c-hypo:#9a9ea7; --c-energie:#9a9ea7;
     --b-trigema:#4a4e55; --b-kacirkova:#4a4e55;
@@ -182,6 +184,10 @@ h2{font-size:14px;text-transform:uppercase;letter-spacing:.07em;color:var(--mute
   overflow:hidden;margin-right:8px;vertical-align:middle}
 .ph-barwrap i{display:block;height:100%;background:var(--c-energie);border-radius:99px}
 .ph tr.ph-now td{font-weight:600;background:var(--accent-soft)}
+/* řádky tabulky se střídavě šedí podle kalendářního roku začátku období */
+.ph tr.rok-a td,.ph tr.rok-a.ph-now td{background:var(--rok-a)}
+.ph tr.rok-b td,.ph tr.rok-b.ph-now td{background:var(--rok-b)}
+.ph tr.rok-a .ph-barwrap,.ph tr.rok-b .ph-barwrap{background:var(--rok-stopa)}
 .ph td.ph-src{color:var(--muted);font-size:12px}
 .ph-note{margin-top:10px;font-size:12.5px;color:var(--muted)}
 .cardhead{padding:13px 16px 12px}
@@ -410,7 +416,7 @@ async function spustApp(){
   if (!appLoaded) {
     appLoaded = true;
     const s = document.createElement('script');
-    s.src = 'app.js?v=38';
+    s.src = 'app.js?v=39';
     s.onerror = () => { appLoaded = false; ukazPrihlaseni('Nepodařilo se načíst aplikaci.'); };
     document.body.appendChild(s);
   }

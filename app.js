@@ -71,6 +71,8 @@ function vyvojTabulka(nazev, radky, dph){
     const zmHtml = zm===null ? "" :
       `<span style="color:var(--${zm>0?'red':zm<0?'green':'muted'})">${zm>0?"+":""}${zm} %</span>`;
     const posledni = i===radky.length-1;
+    const rok = rozsireno ? +(String(r.obdobi).match(/\d{4}/)||[0])[0] : 0;
+    const tridaRoku = rok ? ` rok-${rok%2 ? "b" : "a"}` : "";
     const maFaktury = r.zaplaceno!=null;
     const doplnek = !rozsireno ? `<td class="ph-src">${r.zdroj}</td>` : `
       <td style="white-space:nowrap">${maFaktury?`${r.kwh.toLocaleString("cs-CZ")} kWh`:""}</td>
@@ -78,7 +80,7 @@ function vyvojTabulka(nazev, radky, dph){
       <td>${maFaktury?"nejsou":""}</td>
       <td>${maFaktury?`měsíčně dorovnáno inkasem (${r.faktur} ${r.faktur<5?"faktury":"faktur"})${r.vysledekPozn?`<br><span class="ph-src">${r.vysledekPozn}</span>`:""}`:""}</td>
       <td class="ph-cena">${maFaktury?`<div class="ph-barwrap"><i style="width:${(r.zaplaceno/maxZapl*100).toFixed(0)}%"></i></div><b>${kcH(r.zaplaceno)}</b>`:""}</td>`;
-    return `<tr${posledni?' class="ph-now"':''}>
+    return `<tr class="${posledni?"ph-now":""}${tridaRoku}">
       <td>${r.obdobi}</td><td>${r.produkt}</td>
       <td class="ph-cena"><div class="ph-barwrap"><i style="width:${(r.mwh/max*100).toFixed(0)}%"></i></div><b>${cenaKwhDph(r.mwh*dph)}</b></td>
       <td style="white-space:nowrap">${zmHtml}</td>
