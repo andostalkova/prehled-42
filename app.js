@@ -102,7 +102,7 @@ function elektrinaTabulka(roky, dph){
       <td class="ph-cena"><div class="ph-barwrap"><i style="width:${(r.zaplaceno/max*100).toFixed(0)}%"></i></div><b>${kcH(r.zaplaceno)}</b></td></tr>`;
   }).join("");
   return `<div class="btitle btitle-komodita">Elektřina (sazba D02d, vysoký tarif) – ceny a zaplaceno po kalendářních letech (s DPH)</div>
-    <div class="ph-scroll"><table class="ph"><thead><tr>
+    <div class="ph-scroll"><table class="ph ph-zar"><thead><tr>
       <th>Rok</th><th>Produkt</th><th>Cena elektřiny Kč/kWh</th><th>Stálý plat / měs.</th><th>Spotřeba</th><th>Kč za 1 kWh celkem</th><th>Zálohy</th><th>Přeplatek / nedoplatek</th><th>Zaplaceno celkem</th>
     </tr></thead><tbody>${tr}</tbody></table></div>
     <div class="ph-note">Když se v roce změnila cena nebo produkt, je uvedeno „původní → nové“. „Cena elektřiny“ je samotná komodita, „Kč za 1 kWh celkem“ je elektřina a regulované služby s DPH, před slevami, děleno spotřebou.
@@ -136,7 +136,7 @@ function plynTabulka(radky, dph){
       <td class="ph-cena">${maVyuct?`<div class="ph-barwrap"><i style="width:${(zaplaceno(r)/max*100).toFixed(0)}%"></i></div><b>${kcH(zaplaceno(r))}</b>`:""}</td></tr>`;
   }).join("");
   return `<div class="btitle btitle-komodita">Plyn – ceny a celkem zaplaceno za vyúčtování (s DPH)</div>
-    <div class="ph-scroll"><table class="ph"><thead><tr>
+    <div class="ph-scroll"><table class="ph ph-zar"><thead><tr>
       <th>Období</th><th>Produkt</th><th>Cena plynu Kč/kWh</th><th>Stálý plat / měs.</th><th>Spotřeba</th><th>Kč za 1 kWh celkem</th><th>Zálohy</th><th>Přeplatek / nedoplatek</th><th>Zaplaceno celkem</th>
     </tr></thead><tbody>${tr}</tbody></table></div>
     <div class="ph-note">Když se v období změnila cena, je uvedena jako „původní → nová“. „Cena plynu“ je samotná komodita, „Kč za 1 kWh celkem“ je celkem zaplaceno děleno spotřebou, tedy včetně distribuce, stálého platu a DPH. U krátkých období je cena vyšší, protože se stálý plat rozpočítá na malou spotřebu.
