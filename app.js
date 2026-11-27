@@ -108,8 +108,9 @@ function plynTabulka(radky, dph){
     const vys = !maVyuct ? "" : r.vysledek>0 ? `doplatek ${kcH(r.vysledek)}` : `<span style="color:var(--green)">přeplatek ${kcH(-r.vysledek)}</span>`;
     const pozn = !maVyuct ? "aktuální cena, zatím bez vyúčtování" : r.sleva ? `sleva ${kc(r.sleva)} (Kč za 1 kWh celkem je před slevou)` : "";
     const obdobi = r.do ? `${mesRok(r.od)}–${mesRok(r.do)}` : `od ${mesRok(r.od)}`;
-    const rok = +r.od.split("-")[0];
-    return `<tr class="${i===radky.length-1?"ph-now":""} rok-${rok%2?"b":"a"}">
+    const mesicu = r.do ? (+r.do.slice(0,4)-+r.od.slice(0,4))*12 + (+r.do.slice(5,7)-+r.od.slice(5,7)) : 0;
+    const rocni = mesicu>=11 && mesicu<=13;   // šedě jen období dlouhá přibližně rok
+    return `<tr class="${i===radky.length-1?"ph-now":""}${rocni?" rok-b":""}">
       <td style="white-space:nowrap">${obdobi}${pozn?`<br><span class="ph-src" style="white-space:normal">${pozn}</span>`:""}</td>
       <td>${r.produkt}</td>
       <td style="white-space:nowrap">${cenaTxt(r.ceny)}</td>
