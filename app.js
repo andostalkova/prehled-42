@@ -88,7 +88,6 @@ function elektrinaTabulka(roky, dph){
   const max = Math.max(...roky.map(r=>r.zaplaceno));
   const bezOpakovani = a => a.filter((x,i)=>i===0||x!==a[i-1]);
   const cenaTxt = a => a ? bezOpakovani(a).map(x=>cenaKwhDph(x*dph)).join(" → ") : "";
-  const platTxt = a => a ? bezOpakovani(a).map(x=>Math.round(x).toLocaleString("cs-CZ")).join(" → ")+" Kč" : "";
   const fakturTxt = n => n+" "+(n<5?"faktury":"faktur");
   const vysledekTxt = r => {
     if(r.vysledek==null) return `inkaso (${fakturTxt(r.faktur)})`;
@@ -96,24 +95,24 @@ function elektrinaTabulka(roky, dph){
     return v + (r.inkaso ? `<br>PRE: inkaso (${fakturTxt(r.inkaso)})` : "");
   };
   const tr = roky.map((r,i)=>{
+    const ostatni = r.cenaPrum!=null ? (r.vyuct/r.kwh - r.cenaPrum).toLocaleString("cs-CZ",{minimumFractionDigits:2,maximumFractionDigits:2}) : "";
     return `<tr class="${i===roky.length-1?"ph-now":""} rok-${r.rok%2?"b":"a"}">
       <td style="white-space:nowrap">${r.rok}${r.pozn?`<br><span class="ph-src" style="white-space:normal">${r.pozn}</span>`:""}</td>
-      <td>${r.produkty.join(" → ")}</td>
       <td style="white-space:nowrap">${cenaTxt(r.mwh)}</td>
-      <td style="white-space:nowrap">${platTxt(r.platy)}</td>
-      <td style="white-space:nowrap">${r.kwh.toLocaleString("cs-CZ")} kWh</td>
+      <td style="white-space:nowrap">${ostatni}</td>
       <td style="white-space:nowrap">${(r.vyuct/r.kwh).toLocaleString("cs-CZ",{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+      <td style="white-space:nowrap">${r.zalohaMes ? bezOpakovani(r.zalohaMes).map(x=>Math.round(x).toLocaleString("cs-CZ")).join(" → ")+" Kč" : "nejsou"}</td>
       <td>${r.zalohy!=null?kcH(r.zalohy):"nejsou"}</td>
       <td>${vysledekTxt(r)}</td>
       <td class="ph-cena"><div class="ph-barwrap"><i style="width:${(r.zaplaceno/max*100).toFixed(0)}%"></i></div><b>${kcH(r.zaplaceno)}</b></td></tr>`;
   }).join("");
   return `<div class="btitle btitle-komodita">Elektřina (sazba D02d, vysoký tarif) – ceny a zaplaceno po kalendářních letech (s DPH)</div>
-    <div class="ph-scroll"><table class="ph ph-zar"><thead><tr>
-      <th>Rok</th><th>Produkt</th><th>Cena elektřiny Kč/kWh</th><th>Stálý plat / měs.</th><th>Spotřeba</th><th>Kč za 1 kWh celkem</th><th>Zálohy</th><th>Přeplatek / nedoplatek</th><th>Zaplaceno celkem</th>
+    <div class="ph-scroll"><table class="ph ph-el"><thead><tr>
+      <th>Rok</th><th>Cena elektřiny Kč/kWh</th><th>Ostatní poplatky Kč/kWh</th><th>Kč za 1 kWh celkem</th><th>Měsíční záloha</th><th>Zálohy celkem</th><th>Přeplatek / nedoplatek</th><th>Zaplaceno celkem</th>
     </tr></thead><tbody>${tr}</tbody></table></div>
-    <div class="ph-note">Když se v roce změnila cena nebo produkt, je uvedeno „původní → nové“. „Cena elektřiny“ je samotná komodita, „Kč za 1 kWh celkem“ je elektřina a regulované služby s DPH, před slevami, děleno spotřebou. Ceny FOSFA jsou dopočtené z rozpisu faktur (od 6/2019), ceny GAS INT jsou přímo z faktur.
-      „Zaplaceno celkem“ je vyúčtovaná spotřeba z měsíčních faktur po slevách. Spotřeba a platby jsou z faktur FOSFA (od 11/2018 do 4/2021), GAS INT (od 5/2021 do 10/2022) a PRE (od 10/2022 do 10/2026).
-      FOSFA a GAS INT vyúčtovávaly měsíčně proti zálohám; PRE nemá zálohy a platí se měsíční faktura inkasem.
+    <div class="ph-note">„Cena elektřiny“ je samotná silová elektřina (při změně ceny během roku „původní → nová“). „Ostatní poplatky“ jsou stálý plat, distribuce, regulované poplatky, daň z elektřiny a DPH, počítané na 1 kWh.
+      „Kč za 1 kWh celkem“ je součet obou, před slevami, děleno spotřebou; u roku se změnou ceny je „Ostatní poplatky“ dopočtené z průměrné ceny elektřiny za rok. „Zaplaceno celkem“ je vyúčtovaná spotřeba z měsíčních faktur po slevách.
+      Údaje jsou z faktur FOSFA (od 11/2018 do 4/2021), GAS INT (od 5/2021 do 10/2022) a PRE (od 10/2022 do 10/2026). FOSFA a GAS INT vyúčtovávaly měsíčně proti zálohám; PRE nemá zálohy a měsíční faktura se platí inkasem.
       ${roky.filter(r=>r.vysledekPozn).map(r=>`<br>Rok ${r.rok}: ${r.vysledekPozn}`).join("")}</div>`;
 }
 /* Plyn: jedna tabulka – cena plynu z ceníku (komodita) a celkem zaplaceno za jednotlivá vyúčtování
