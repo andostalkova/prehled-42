@@ -81,28 +81,36 @@ function vyvojTabulka(nazev, radky, dph){
       <th>Období</th><th>Produkt</th><th>Kč/kWh s DPH</th><th>Změna</th><th>Stálý plat / měs.</th><th>Zdroj</th>
     </tr></thead><tbody>${tr}</tbody></table></div>`;
 }
-/* Plyn: celkem zaplaceno za jednotlivá vyúčtování (s DPH, po případné slevě), sloupce podle tabulky vody. */
+/* Plyn: jedna tabulka – cena plynu z ceníku (komodita) a celkem zaplaceno za jednotlivá vyúčtování
+   (s DPH, po případné slevě); sloupce podle tabulky vody. Ceny jsou v Kč/MWh bez DPH, zobrazují se jako Kč/kWh s DPH. */
 const mesRok = s => { const [y,m] = s.split("-"); return (+m)+"/"+y; };
-function plynVyuctovaniTabulka(radky){
+function plynTabulka(radky, dph){
   const zaokr = x => Math.round(x*100)/100;
   const zaplaceno = r => zaokr(r.celkem-(r.sleva||0));
-  const max = Math.max(...radky.map(zaplaceno));
+  const max = Math.max(...radky.filter(r=>r.kwh).map(zaplaceno));
+  const cenaTxt = a => a.map(x=>cenaKwhDph(x*dph)).join(" → ");
+  const platTxt = a => a.map(x=>x.toLocaleString("cs-CZ",{minimumFractionDigits:x%1?2:0})).join(" → ")+" Kč";
   const tr = radky.map((r,i)=>{
-    const vys = r.vysledek>0 ? `doplatek ${kcH(r.vysledek)}` : `<span style="color:var(--green)">přeplatek ${kcH(-r.vysledek)}</span>`;
-    const pozn = [r.zdroj, r.sleva?`sleva ${kc(r.sleva)} (Kč za 1 kWh je před slevou)`:""].filter(Boolean).join(", ");
+    const maVyuct = r.kwh != null;
+    const vys = !maVyuct ? "" : r.vysledek>0 ? `doplatek ${kcH(r.vysledek)}` : `<span style="color:var(--green)">přeplatek ${kcH(-r.vysledek)}</span>`;
+    const pozn = !maVyuct ? "aktuální cena, zatím bez vyúčtování" : r.sleva ? `sleva ${kc(r.sleva)} (Kč za 1 kWh celkem je před slevou)` : "";
+    const obdobi = r.do ? `${mesRok(r.od)}–${mesRok(r.do)}` : `od ${mesRok(r.od)}`;
     return `<tr${i===radky.length-1?' class="ph-now"':''}>
-      <td style="white-space:nowrap">${mesRok(r.od)}–${mesRok(r.do)}<br><span class="ph-src" style="white-space:normal">${pozn}</span></td>
-      <td style="white-space:nowrap">${r.kwh.toLocaleString("cs-CZ",{maximumFractionDigits:0})} kWh</td>
-      <td class="ph-cena"><div class="ph-barwrap"><i style="width:${(zaplaceno(r)/max*100).toFixed(0)}%"></i></div><b>${kcH(zaplaceno(r))}</b></td>
-      <td style="white-space:nowrap">${cenaKwhDph(r.celkem/r.kwh*1000)}</td>
-      <td>${kcH(r.zalohy)}${r.zalohyPozn?`<br><span class="ph-src">${r.zalohyPozn}</span>`:""}</td>
+      <td style="white-space:nowrap">${obdobi}${pozn?`<br><span class="ph-src" style="white-space:normal">${pozn}</span>`:""}</td>
+      <td>${r.produkt}</td>
+      <td style="white-space:nowrap">${cenaTxt(r.ceny)}</td>
+      <td style="white-space:nowrap">${platTxt(r.platy)}</td>
+      <td style="white-space:nowrap">${maVyuct?`${r.kwh.toLocaleString("cs-CZ",{maximumFractionDigits:0})} kWh`:""}</td>
+      <td class="ph-cena">${maVyuct?`<div class="ph-barwrap"><i style="width:${(zaplaceno(r)/max*100).toFixed(0)}%"></i></div><b>${kcH(zaplaceno(r))}</b>`:""}</td>
+      <td style="white-space:nowrap">${maVyuct?cenaKwhDph(r.celkem/r.kwh*1000):""}</td>
+      <td>${maVyuct?kcH(r.zalohy):""}${r.zalohyPozn?`<br><span class="ph-src">${r.zalohyPozn}</span>`:""}</td>
       <td style="white-space:nowrap">${vys}</td></tr>`;
   }).join("");
-  return `<div class="btitle btitle-komodita">Plyn – celkem zaplaceno za vyúčtování (s DPH)</div>
+  return `<div class="btitle btitle-komodita">Plyn – ceny a celkem zaplaceno za vyúčtování (s DPH)</div>
     <div class="ph-scroll"><table class="ph"><thead><tr>
-      <th>Období</th><th>Spotřeba</th><th>Celkem zaplaceno</th><th>Kč za 1 kWh</th><th>Zálohy</th><th>Výsledek</th>
+      <th>Období</th><th>Produkt</th><th>Cena plynu Kč/kWh</th><th>Stálý plat / měs.</th><th>Spotřeba</th><th>Celkem zaplaceno</th><th>Kč za 1 kWh celkem</th><th>Zálohy</th><th>Výsledek</th>
     </tr></thead><tbody>${tr}</tbody></table></div>
-    <div class="ph-note">„Kč za 1 kWh“ = celkem děleno spotřebou, tedy včetně distribuce, stálého měsíčního platu a DPH. U krátkých období je cena vyšší, protože se stálý plat rozpočítá na malou spotřebu.
+    <div class="ph-note">Když se v období změnila cena, je uvedena jako „původní → nová“. „Cena plynu“ je samotná komodita, „Kč za 1 kWh celkem“ je celkem zaplaceno děleno spotřebou, tedy včetně distribuce, stálého platu a DPH. U krátkých období je cena vyšší, protože se stálý plat rozpočítá na malou spotřebu.
       „Zálohy“ jsou zúčtované zálohy podle faktury; mohou zahrnovat i přeplatek z předchozího vyúčtování, nejde proto vždy o peníze skutečně poslané v daném období.</div>`;
 }
 function vyvojCenKarta(b){
@@ -113,8 +121,7 @@ function vyvojCenKarta(b){
     <div class="block blk-energie">
       ${vyvojTabulka("Elektřina (sazba D02d, vysoký tarif)", v.elektrina, v.dph)}
       <div style="border-top:1px solid var(--line);margin:14px 0"></div>
-      ${vyvojTabulka("Plyn", v.plyn, v.dph)}
-      ${v.plynVyuctovani ? `<div style="border-top:1px solid var(--line);margin:14px 0"></div>${plynVyuctovaniTabulka(v.plynVyuctovani)}` : ""}
+      ${v.plynVyuctovani ? plynTabulka(v.plynVyuctovani, v.dph) : vyvojTabulka("Plyn", v.plyn, v.dph)}
       <div class="ph-note">${v.pozn}</div>
     </div>
   </div>`;
