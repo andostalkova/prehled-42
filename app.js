@@ -10,8 +10,8 @@ const DAY = 86400000;
 const czDate = s => { const d=new Date(s+"T00:00:00");
   return d.toLocaleDateString("cs-CZ",{day:"numeric",month:"numeric",year:"numeric"}); };
 const dayDiff = s => Math.round((new Date(s+"T00:00:00") - TODAY)/DAY);
-const kc = n => n.toLocaleString("cs-CZ")+" Kč";
-const kcH = n => n.toLocaleString("cs-CZ",{minimumFractionDigits:Number.isInteger(n)?0:2, maximumFractionDigits:2})+" Kč";   // s haléři, když jsou
+const kc = n => (Math.round(n)+0).toLocaleString("cs-CZ")+" Kč";   // částky se zobrazují na celé koruny
+const kcH = kc;
 const htmlEscape = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const pad = n => String(n).padStart(2,"0");
 const minusMonths = (s,m) => { const d=new Date(s+"T00:00:00"); d.setMonth(d.getMonth()-m);
@@ -73,7 +73,7 @@ function vyvojTabulka(nazev, radky, dph){
       <td>${r.obdobi}</td><td>${r.produkt}</td>
       <td class="ph-cena"><div class="ph-barwrap"><i style="width:${(r.mwh/max*100).toFixed(0)}%"></i></div><b>${cenaKwhDph(r.mwh*dph)}</b></td>
       <td style="white-space:nowrap">${zmHtml}</td>
-      <td>${r.plat.toLocaleString("cs-CZ",{minimumFractionDigits:r.plat%1?2:0})} Kč</td>
+      <td>${Math.round(r.plat).toLocaleString("cs-CZ")} Kč</td>
       <td class="ph-src">${r.zdroj}</td></tr>`;
   }).join("");
   return `<div class="btitle btitle-komodita">${nazev}</div>
@@ -117,10 +117,10 @@ function plynTabulka(radky, dph){
   const zaplaceno = r => zaokr(r.celkem-(r.sleva||0));
   const max = Math.max(...radky.filter(r=>r.kwh).map(zaplaceno));
   const cenaTxt = a => a.map(x=>cenaKwhDph(x*dph)).join(" → ");
-  const platTxt = a => a.map(x=>x.toLocaleString("cs-CZ",{minimumFractionDigits:x%1?2:0})).join(" → ")+" Kč";
+  const platTxt = a => a.map(x=>Math.round(x).toLocaleString("cs-CZ")).join(" → ")+" Kč";
   const tr = radky.map((r,i)=>{
     const maVyuct = r.kwh != null;
-    const vys = !maVyuct ? "" : r.vysledek>0 ? `doplatek ${kcH(r.vysledek)}` : `<span style="color:var(--green)">přeplatek ${kcH(-r.vysledek)}</span>`;
+    const vys = !maVyuct ? "" : r.vysledek>0 ? `<span style="color:var(--red)">nedoplatek ${kcH(r.vysledek)}</span>` : `<span style="color:var(--green)">přeplatek ${kcH(-r.vysledek)}</span>`;
     const pozn = !maVyuct ? "aktuální cena, zatím bez vyúčtování" : r.sleva ? `sleva ${kc(r.sleva)} (Kč za 1 kWh celkem je před slevou)` : "";
     const obdobi = r.do ? `${mesRok(r.od)}–${mesRok(r.do)}` : `od ${mesRok(r.od)}`;
     const mesicu = r.do ? (+r.do.slice(0,4)-+r.od.slice(0,4))*12 + (+r.do.slice(5,7)-+r.od.slice(5,7)) : 0;
