@@ -87,7 +87,6 @@ const mesRok = s => { const [y,m] = s.split("-"); return (+m)+"/"+y; };
 function plynVyuctovaniTabulka(radky){
   const zaokr = x => Math.round(x*100)/100;
   const soucet = (a,f) => zaokr(a.reduce((s,x)=>s+f(x),0));
-  const vysTxt = v => v>0 ? `doplatek ${kcH(v)}` : `<span style="color:var(--green)">přeplatek ${kcH(-v)}</span>`;
   const kwhTxt = k => k.toLocaleString("cs-CZ",{maximumFractionDigits:0})+" kWh";
   const roky = {};
   radky.forEach(r => { const rok = r.do.slice(0,4); (roky[rok] = roky[rok] || []).push(r); });
@@ -99,22 +98,18 @@ function plynVyuctovaniTabulka(radky){
       <td style="white-space:nowrap"><b>${kwhTxt(kwh)}</b></td>
       <td style="white-space:nowrap"><b>${kcH(zaokr(celkem-sleva))}</b></td>
       <td style="white-space:nowrap"><b>${cenaKwhDph(celkem/kwh*1000)}</b></td>
-      <td style="white-space:nowrap"><b>${kcH(soucet(a,x=>x.zalohy))}</b></td>
-      <td style="white-space:nowrap"><b>${vysTxt(soucet(a,x=>x.vysledek))}</b></td>
       <td class="ph-src">celkem za vyúčtování skončená v roce ${rok}</td></tr>`;
     const radkyHtml = a.map(r => `<tr>
       <td style="padding-left:18px;white-space:nowrap">${mesRok(r.od)}–${mesRok(r.do)}</td>
       <td style="white-space:nowrap">${kwhTxt(r.kwh)}</td>
       <td style="white-space:nowrap">${kcH(zaokr(r.celkem-(r.sleva||0)))}</td>
       <td style="white-space:nowrap">${cenaKwhDph(r.celkem/r.kwh*1000)}</td>
-      <td style="white-space:nowrap">${kcH(r.zalohy)}</td>
-      <td style="white-space:nowrap">${vysTxt(r.vysledek)}</td>
       <td class="ph-src">${r.zdroj}${r.sleva?`, sleva ${kc(r.sleva)} (Kč/kWh je před slevou)`:""}</td></tr>`).join("");
     return hlava + radkyHtml;
   }).join("");
   return `<div class="btitle btitle-komodita">Plyn – celkem zaplaceno za vyúčtování (s DPH)</div>
     <div class="ph-scroll"><table class="ph"><thead><tr>
-      <th>Rok / období</th><th>Spotřeba</th><th>Zaplaceno celkem</th><th>Kč/kWh s DPH</th><th>Zálohy</th><th>Výsledek</th><th>Zdroj</th>
+      <th>Rok / období</th><th>Spotřeba</th><th>Zaplaceno celkem</th><th>Kč/kWh s DPH</th><th>Zdroj</th>
     </tr></thead><tbody>${tr}</tbody></table></div>`;
 }
 function vyvojCenKarta(b){
